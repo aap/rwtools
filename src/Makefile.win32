@@ -1,0 +1,12 @@
+OBJDIR=..\obj
+_OBJ = dffread.obj dffwrite.obj ps2native.obj xboxnative.obj txdread.obj\
+txdwrite.obj renderware.obj ifpread.obj dffconv.obj txdconv.obj txdex.obj ifp.obj
+OBJ = $(OBJDIR)\$(_OBJ: = ..\obj\) # can't subsitute $(OBJDIR) here
+HEADER = renderware.h
+CC = cl
+CFLAGS=/EHsc /DDEBUG
+
+dfftools: $(OBJ)
+
+{}.cpp{$(OBJDIR)}.obj:
+	$(CC) $(CFLAGS) /c /Fo$(@) $< 
