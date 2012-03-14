@@ -142,6 +142,8 @@ void Geometry::readData(uint32 vertexCount, uint32 type,
                         uint32 split, ifstream &rw)
 {
 	float32 vertexScale = (flags & FLAGS_NORMALS) ? VERTSCALE2 : VERTSCALE1;
+	if (flags & FLAGS_PRELIT)
+		vertexScale = VERTSCALE1;
 
 	uint32 size;
 	type &= 0xFF00FFFF;
