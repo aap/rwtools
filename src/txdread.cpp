@@ -462,6 +462,7 @@ void NativeTexture::convertFromPS2(void)
 	if (platform != PLATFORM_PS2)
 		return;
 
+	hasAlpha = false;
 	for (uint32 j = 0; j < mipmapCount; j++) {
 		bool swizzled = (swizzleHeight[j] != height[j]);
 
@@ -512,6 +513,8 @@ void NativeTexture::convertFromPS2(void)
 				uint32 newval = texels[j][i*4+3] * 0xff;
 				newval /= 0x80;
 				texels[j][i*4+3] = newval;
+				if (texels[j][i*4+3] != 0xFF)
+					hasAlpha = true;
 			}
 		}
 	}
@@ -521,6 +524,8 @@ void NativeTexture::convertFromPS2(void)
 			uint32 newalpha = palette[i*4+3] * 0xff;
 			newalpha /= 0x80;
 			palette[i*4+3] = newalpha;
+			if (palette[i*4+3] != 0xFF)
+				hasAlpha = true;
 		}
 	}
 
