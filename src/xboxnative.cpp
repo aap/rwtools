@@ -81,14 +81,20 @@ void Geometry::readXboxNativeData(ifstream &rw)
 	uint32 vertexPosition = rw.tellg();
 	vertexPosition += readUInt32(rw);
 
-
 	/* Header */
 	rw.seekg(2, ios::cur);
 	uint32 splitCount = readUInt16(rw);
 	splits.resize(splitCount);
 	/* from here the index blocks are 0x10 byte aligned */
 	uint32 blockStart = rw.tellg();
-	rw.seekg(4, ios::cur);
+	uint32 flag = readUInt32(rw);
+	if (flag & 1) {
+		faceType = FACETYPE_LIST;
+		flags &= ~FLAGS_TRISTRIP;
+	} else {	// 2
+		faceType = FACETYPE_STRIP;
+		flags |= FLAGS_TRISTRIP;
+	}
 	uint32 vertexCount = readUInt32(rw);
 	uint32 vertexSize = readUInt32(rw);
 	rw.seekg(16, ios::cur);

@@ -113,7 +113,6 @@ void NativeTexture::readD3d(ifstream &rw)
 			dxtCompression = 0;
 	}
 
-//	cout<< hex << dxtCompression << " " << rasterFormat <<" "<< filename << " " << rw.tellg() << " " << name << endl;
 
 	if (rasterFormat & RASTER_PAL8 || rasterFormat & RASTER_PAL4) {
 		paletteSize = (rasterFormat & RASTER_PAL8) ? 0x100 : 0x10;
@@ -182,8 +181,6 @@ void NativeTexture::readXbox(ifstream &rw)
 	dxtCompression = readUInt8(rw);
 	uint32 size = readUInt32(rw);
 
-//	cout<< hex << dxtCompression << " " << rasterFormat <<" "<< filename << " " << rw.tellg() << " " << name << endl;
-
 	paletteSize = (rasterFormat & RASTER_PAL8) ? 0x100 :
 		      ((rasterFormat & RASTER_PAL4) ? 0x20 /* ! */ : 0);
 	palette = new uint8[paletteSize*4];
@@ -214,21 +211,6 @@ void NativeTexture::readXbox(ifstream &rw)
 		rw.read(reinterpret_cast <char *> (&texels[i][0]),
 			dataSizes[i]*sizeof(uint8));
 	}
-
-	if (dxtCompression == 0xc) {
-		dxtCompression = 1;
-		rasterFormat &= ~RASTER_MASK;
-		if (hasAlpha)
-			rasterFormat |= RASTER_1555;
-		else
-			rasterFormat |= RASTER_565;
-	} else if (dxtCompression == 0xe) {
-		dxtCompression = 3;
-		rasterFormat &= ~RASTER_MASK;
-		rasterFormat |= RASTER_4444;
-	} else if (dxtCompression == 0xf) {
-		dxtCompression = 4;
-	}
 }
 
 void unswizzleXboxBlock(uint8 *out, uint8 *in, uint32 &outOff, uint32 inOff,
@@ -258,18 +240,20 @@ void unswizzleXboxBlock(uint8 *out, uint8 *in, uint32 &outOff, uint32 inOff,
 
 void NativeTexture::convertFromXbox(void)
 {
-/*
-	if (dxtCompression)
-		return;
-	for (uint32 i = 0; i < mipmapCount; i++) {
-		uint8 *outtexels = new uint8[dataSizes[i]];
-		uint32 j = 0;
-		unswizzleXboxBlock(outtexels, texels[i], j, 0,
-		                   width[i], height[i], width[i]);
-		delete[] texels[i];
-		texels[i] = outtexels;
+	if (dxtCompression == 0xc) {
+		dxtCompression = 1;
+		rasterFormat &= ~RASTER_MASK;
+		if (hasAlpha)
+			rasterFormat |= RASTER_1555;
+		else
+			rasterFormat |= RASTER_565;
+	} else if (dxtCompression == 0xe) {
+		dxtCompression = 3;
+		rasterFormat &= ~RASTER_MASK;
+		rasterFormat |= RASTER_4444;
+	} else if (dxtCompression == 0xf) {
+		dxtCompression = 4;
 	}
-*/
 	platform = PLATFORM_D3D8;
 }
 
@@ -312,8 +296,6 @@ void NativeTexture::readPs2(ifstream &rw)
 	uint32 unk4 = readUInt32(rw);
 */
 	rw.seekg(4*4, ios::cur);
-
-//	cout << hex << rasterFormat << " " << depth << " " << name << endl;
 
 	rw.seekg(4*4, ios::cur);		// constant
 	uint32 dataSize = readUInt32(rw);	// texels + header
@@ -390,14 +372,6 @@ void NativeTexture::readPs2(ifstream &rw)
 			rw.seekg(6*4, ios::cur); // same in every txd
 			unkh4 = readUInt32(rw);
 			rw.seekg(3*4, ios::cur); // same in every txd
-/*
-	printf("%X %X %X %X %X %X %X %X %X %X %X %X %X",
-		unkh1,
-		depth, rasterFormat, width[0], height[0], 
-		unk3, unk4,
-		dataSize, paletteDataSize, unk5, unkh2, unkh3, unkh4);
-		cout << endl;
-*/
 		}
 
 		paletteSize = (rasterFormat & RASTER_PAL8) ? 0x100 : 0x10;
@@ -524,10 +498,16 @@ void NativeTexture::convertFromPS2(void)
 			uint32 newalpha = palette[i*4+3] * 0xff;
 			newalpha /= 0x80;
 			palette[i*4+3] = newalpha;
-			if (palette[i*4+3] != 0xFF)
+			// that sucks (and isn't really correct)
+			if (palette[i*4+3] != 0xFF &&
+			    palette[i*4+0] > 1 &&
+			    palette[i*4+1] > 1 &&
+			    palette[i*4+2] > 1)
 				hasAlpha = true;
 		}
 	}
+	if (maskName != "")
+		hasAlpha = true;
 
 	platform = PLATFORM_D3D8;
 	dxtCompression = 0;

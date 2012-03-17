@@ -146,54 +146,6 @@ struct HeaderInfo
 	uint32 write(std::ofstream &rw);
 };
 
-enum StreamMode {
-	STR_READ = 1,
-	STR_WRITE = 2
-};
-
-enum StreamType {
-	STR_MEM = 1,
-	STR_FILE
-};
-
-#if 0
-class Stream
-{
-private:
-	std::fstream file;
-	uint32 pos;
-	StreamMode mode;
-	StreamType type;
-public:
-	uint32 fail;
-	void open(char *path, StreamMode mode, StreamType type);
-	void close(void);
-
-	uint32 tell(void);
-	void seek(uint32 pos, uint32 off);
-
-	uint32 read(char *buf, uint32 length);
-	uint32 write(char *buf, uint32 length);
-
-/*
-	uint32 writeInt8(int8 tmp);
-	uint32 writeUInt8(uint8 tmp);
-	uint32 writeInt16(int16 tmp);
-	uint32 writeUInt16(uint16 tmp);
-	uint32 writeInt32(int32 tmp);
-	uint32 writeUInt32(uint32 tmp);
-	uint32 writeFloat32(float32 tmp);
-	int8 readInt8(void);
-	uint8 readUInt8(void);
-	int16 readInt16(void);
-	uint16 readUInt16(void);
-	int32 readInt32(void);
-	uint32 readUInt32(void);
-	float32 readFloat32(void);
-*/
-};
-#endif
-
 void ChunkNotFound(CHUNK_TYPE chunk, uint32 address);
 uint32 writeInt8(int8 tmp, std::ofstream &rw);
 uint32 writeUInt8(uint8 tmp, std::ofstream &rw);
