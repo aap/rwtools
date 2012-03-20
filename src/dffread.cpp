@@ -48,8 +48,11 @@ void Clump::read(ifstream& rw)
 		geometryList[i].read(rw);
 
 	/* read atomics */
-	for (uint32 i = 0; i < numAtomics; i++)
+	for (uint32 i = 0; i < numAtomics; i++) {
 		atomicList[i].read(rw);
+//		cout << i << " " << frameList[atomicList[i].frameIndex].name
+//		        << " " << atomicList[i].geometryIndex << endl;
+	}
 
 	/* skip lights */
 	for (uint32 i = 0; i < numLights; i++) {
@@ -242,7 +245,6 @@ void Geometry::read(ifstream &rw)
 	    header.version == VCPS2) {
 		rw.seekg(12, ios::cur);
 	}
-//	cout << hex << rw.tellg() << " " << flags << " " << numUVs<< endl;
 
 	if (!hasNativeGeometry) {
 		if (flags & FLAGS_PRELIT) {
@@ -336,9 +338,6 @@ void Geometry::readExtension(ifstream &rw)
 				readXboxNativeData(rw);
 			else
 				cout << "unknown platform " << platform << endl;
-			/* skip everything just to be sure */
-			//rw.seekg(beg, ios::beg);
-			//rw.seekg(header.length, ios::cur);
 			break;
 		}
 		case CHUNK_MESHEXTENSION: {
@@ -370,12 +369,11 @@ void Geometry::readExtension(ifstream &rw)
 			break;
 		} case CHUNK_SKIN: {
 			if (hasNativeGeometry) {
-
 				uint32 beg = rw.tellg();
 				rw.seekg(0x0c, ios::cur);
 				uint32 platform = readUInt32(rw);
 				rw.seekg(beg, ios::beg);
-//				uint32 end = beg+header.length;
+				uint32 end = beg+header.length;
 				if (platform == PLATFORM_PS2) {
 					hasSkin = true;
 					readPs2NativeSkin(rw);
@@ -387,7 +385,6 @@ void Geometry::readExtension(ifstream &rw)
 					     << platform << endl;
 					rw.seekg(header.length, ios::cur);
 				}
-//				rw.seekg(end, ios::beg);
 			} else {
 				hasSkin = true;
 				boneCount = readUInt8(rw);
@@ -688,6 +685,35 @@ Geometry::Geometry(void)
 	meshExtension = 0;
 	hasSkin = false;
 	hasNightColors = false;
+}
+
+Geometry::Geometry(const Geometry &orig)
+: flags(orig.flags), numUVs(orig.numUVs),
+  hasNativeGeometry(orig.hasNativeGeometry), vertexCount(orig.vertexCount),
+  faces(orig.faces), vertexColors(orig.vertexColors),
+  hasPositions(orig.hasPositions), hasNormals(orig.hasNormals),
+  vertices(orig.vertices), normals(orig.normals),
+  materialList(orig.materialList), faceType(orig.faceType),
+  numIndices(orig.numIndices), splits(orig.splits), hasSkin(orig.hasSkin),
+  boneCount(orig.boneCount), specialIndexCount(orig.specialIndexCount),
+  unknown1(orig.unknown1), unknown2(orig.unknown2),
+  specialIndices(orig.specialIndices),
+  vertexBoneIndices(orig.vertexBoneIndices),
+  vertexBoneWeights(orig.vertexBoneWeights),
+  inverseMatrices(orig.inverseMatrices),
+  hasMeshExtension(orig.hasMeshExtension), hasNightColors(orig.hasNightColors),
+  nightColorsUnknown(orig.nightColorsUnknown), nightColors(orig.nightColors),
+  hasMorph(orig.hasMorph)
+{
+	if (orig.meshExtension)
+		meshExtension = new MeshExtension(*orig.meshExtension);
+	else
+		meshExtension = 0;
+
+	for (uint32 i = 0; i < 8; i++)
+		texCoords[i] = orig.texCoords[i];
+	for (uint32 i = 0; i < 4; i++)
+		boundingSphere[i] = orig.boundingSphere[i];
 }
 
 Geometry::~Geometry(void)

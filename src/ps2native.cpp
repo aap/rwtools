@@ -19,16 +19,23 @@ void Geometry::readPs2NativeSkin(ifstream &rw)
 		return;
 	}
 
-	// don't know if correct
 	boneCount = readUInt8(rw);
 	specialIndexCount = readUInt8(rw);
 	unknown1 = readUInt8(rw);
 	unknown2 = readUInt8(rw);
 
+	specialIndices.resize(specialIndexCount);
+	rw.read((char *) (&specialIndices[0]),
+			specialIndexCount*sizeof(uint8));
+
 	inverseMatrices.resize(boneCount*0x10);
 	for (uint32 i = 0; i < boneCount; i++)
 		rw.read((char *) (&inverseMatrices[i*0x10]),
 		        0x10*sizeof(float32));
+
+	// skip unknowns
+	if (specialIndexCount != 0)
+		rw.seekg(0x1C, ios::cur);
 }
 
 void Geometry::readPs2NativeData(ifstream &rw)
@@ -41,10 +48,13 @@ void Geometry::readPs2NativeData(ifstream &rw)
 		cerr << "error: native data not in ps2 format\n";
 		return;
 	}
+
 	index = 0;
 	vector<uint32> typesRead;
 	for (uint32 i = 0; i < splits.size(); i++) {
 		uint32 splitSize = readUInt32(rw);
+//		uint32 unk = readUInt32(rw);
+//		cout << hex << unk << " " << faceType << endl;
 		rw.seekg(4, ios::cur);
 
 		uint32 numIndices = splits[i].indices.size();

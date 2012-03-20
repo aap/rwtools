@@ -380,7 +380,6 @@ struct Split
 	std::vector<uint32> indices;	
 };
 
-// TODO: needs a copy constructor, but this sucks...
 struct Geometry
 {
 	uint32 flags;
@@ -444,6 +443,7 @@ struct Geometry
 	void cleanUp(void);
 
 	Geometry(void);
+	Geometry(const Geometry &orig);
 	~Geometry(void);
 private:
 	void readPs2NativeData(std::ifstream &dff);
@@ -540,6 +540,7 @@ struct TextureDictionary
 
 
 enum {
+	ANP3 = 0x33504e41,
 	ANPK = 0x4b504e41,
 	INFO = 0x4f464e49,
 	NAME = 0x454d414e,
@@ -562,7 +563,8 @@ struct KeyFrame
 	float32 timeKey;
 
 	/* functions */
-	void read(uint32 fourcc, std::ifstream &ifp);
+	void read_1(uint32 fourcc, std::ifstream &ifp);
+	void read_3(std::ifstream &ifp, uint32 type);
 };
 
 struct AnimObj
@@ -576,7 +578,8 @@ struct AnimObj
 	std::vector<KeyFrame> frmList;
 
 	/* functions */
-	void read(std::ifstream &ifp);
+	void read_1(std::ifstream &ifp);
+	void read_3(std::ifstream &ifp);
 };
 
 struct Animation
@@ -585,7 +588,8 @@ struct Animation
 	std::vector<AnimObj> objList;
 
 	/* functions */
-	void read(std::ifstream &ifp);
+	void read_1(std::ifstream &ifp);
+	void read_3(std::ifstream &ifp);
 	void clear(void);
 };
 
