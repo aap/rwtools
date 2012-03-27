@@ -240,6 +240,8 @@ struct Frame
 	uint32 writeStruct(std::ofstream &dff);
 	uint32 writeExtension(std::ofstream &dff);
 
+	void dump(uint32 index, std::string ind = "", bool detailed = false);
+
 	Frame(void);
 	~Frame(void);
 };
@@ -273,6 +275,7 @@ struct Atomic
 	void read(std::ifstream &dff);
 	void readExtension(std::ifstream &dff);
 	uint32 write(std::ofstream &dff);
+	void dump(uint32 index, std::string ind = "", bool detailed = false);
 	Atomic(void);
 	~Atomic(void);
 };
@@ -292,6 +295,8 @@ struct Texture
 	void read(std::ifstream &dff);
 	uint32 write(std::ofstream &dff);
 	void readExtension(std::ifstream &dff);
+	void dump(std::string ind = "", bool detailed = false);
+
 	Texture(void);
 	~Texture(void);
 };
@@ -353,6 +358,8 @@ struct Material
 	void read(std::ifstream &dff);
 	void readExtension(std::ifstream &dff);
 	uint32 write(std::ofstream &dff);
+
+	void dump(uint32 index, std::string ind = "", bool detailed = false);
 
 	Material(void);
 	Material(const Material &orig);
@@ -442,6 +449,8 @@ struct Geometry
 
 	void cleanUp(void);
 
+	void dump(uint32 index, std::string ind = "", bool detailed = false);
+
 	Geometry(void);
 	Geometry(const Geometry &orig);
 	~Geometry(void);
@@ -473,6 +482,7 @@ struct Clump
 	void read(std::ifstream &dff);
 	void readExtension(std::ifstream &dff);
 	uint32 write(std::ofstream &dff);
+	void dump(bool detailed = false);
 	void clear(void);
 	Clump(void);
 	~Clump(void);

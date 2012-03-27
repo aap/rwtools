@@ -87,6 +87,40 @@ void Clump::readExtension(ifstream &rw)
 	}
 }
 
+void Clump::dump(bool detailed)
+{
+	string ind = "";
+	cout << ind << "Clump {\n";
+	ind += "  ";
+	cout << ind << "numAtomics: " << atomicList.size() << endl;
+
+	cout << endl << ind << "FrameList {\n";
+	ind += "  ";
+	cout << ind << "numFrames: " << frameList.size() << endl;
+	for (uint32 i = 0; i < frameList.size(); i++)
+		frameList[i].dump(i, ind, detailed);
+//		dumpFrame(frameList[i], i, ind);
+	ind = ind.substr(0, ind.size()-2);
+	cout << ind << "}\n";
+
+	cout << endl << ind << "GeometryList {\n";
+	ind += "  ";
+	cout << ind << "numGeometries: " << geometryList.size() << endl;
+	for (uint32 i = 0; i < geometryList.size(); i++)
+		geometryList[i].dump(i, ind, detailed);
+//		dumpGeometry(geometryList[i], i, ind);
+
+	ind = ind.substr(0, ind.size()-2);
+	cout << ind << "}\n\n";
+
+	for (uint32 i = 0; i < atomicList.size(); i++)
+		atomicList[i].dump(i, ind, detailed);
+//		dumpAtomic(atomicList[i], i, ind);
+
+	ind = ind.substr(0, ind.size()-2);
+	cout << ind << "}\n";
+}
+
 void Clump::clear(void)
 {
 	atomicList.resize(0);
@@ -150,6 +184,34 @@ void Atomic::readExtension(ifstream &rw)
 			break;
 		}
 	}
+}
+
+void Atomic::dump(uint32 index, string ind, bool detailed)
+{
+	cout << ind << "Atomic " << index << " {\n";
+	ind += "  ";
+
+	cout << ind << "frameIndex: " << frameIndex << endl;
+	cout << ind << "geometryIndex: " << geometryIndex << endl;
+
+	if (hasRightToRender) {
+		cout << hex;
+		cout << ind << "rightToRenderVal1: " << rightToRenderVal1<<endl;
+		cout << ind << "rightToRenderVal2: " << rightToRenderVal2<<endl;
+		cout << dec;
+	}
+
+	if (hasParticles)
+		cout << ind << "particlesVal: " << particlesVal << endl;
+
+	if (hasPipelineSet)
+		cout << ind << "pipelineSetVal: " << pipelineSetVal << endl;
+
+	if (hasMaterialFx)
+		cout << ind << "materialFxVal: " << materialFxVal << endl;
+
+	ind = ind.substr(0, ind.size()-2);
+	cout << ind << "}\n";
 }
 
 Atomic::Atomic(void)
@@ -216,6 +278,30 @@ void Frame::readExtension(ifstream &rw)
 			break;
 		}
 	}
+}
+
+void Frame::dump(uint32 index, string ind, bool detailed)
+{
+	cout << ind << "Frame " << index << " {\n";
+	ind += "  ";
+
+	cout << ind << "rotationMatrix: ";
+	for (uint32 i = 0; i < 9; i++)
+		cout << rotationMatrix[i] << " ";
+	cout << endl;
+
+	cout << ind << "position: ";
+	for (uint32 i = 0; i < 3; i++)
+		cout << position[i] << " ";
+	cout << endl;
+	cout << ind << "parent: " << parent << endl;
+
+	cout << ind << "name: " << name << endl;
+
+	// TODO: hanim
+
+	ind = ind.substr(0, ind.size()-2);
+	cout << ind << "}\n";
 }
 
 Frame::Frame(void) { hasHAnim = false; hAnimBoneCount = 0;}
@@ -678,6 +764,117 @@ void Geometry::cleanUp(void)
 	}
 }
 
+void Geometry::dump(uint32 index, string ind, bool detailed)
+{
+	cout << ind << "Geometry " << index << " {\n";
+	ind += "  ";
+
+	cout << ind << "flags: " << hex << flags << endl;
+	cout << ind << "numUVs: " << dec << numUVs << endl;
+	cout << ind << "hasNativeGeometry: " << hasNativeGeometry << endl;
+	cout << ind << "triangleCount: " << faces.size()/4 << endl;
+	cout << ind << "vertexCount: " << vertexCount << endl << endl;;
+
+	if (flags & FLAGS_PRELIT) {
+		cout << ind << "vertexColors {\n";
+		ind += "  ";
+		if (!detailed)
+			cout << ind << "skipping\n";
+		else
+			for (uint32 i = 0; i < vertexColors.size()/4; i++)
+				cout << ind << int(vertexColors[i*4+0])<< ", "
+					<< int(vertexColors[i*4+1]) << ", "
+					<< int(vertexColors[i*4+2]) << ", "
+					<< int(vertexColors[i*4+3]) << endl;
+		ind = ind.substr(0, ind.size()-2);
+		cout << ind << "}\n\n";
+	}
+
+	if (flags & FLAGS_TEXTURED) {
+		cout << ind << "texCoords {\n";
+		ind += "  ";
+		if (!detailed)
+			cout << ind << "skipping\n";
+		else
+			for (uint32 i = 0; i < texCoords[0].size()/2; i++)
+				cout << ind << texCoords[0][i*2+0]<< ", "
+					<< texCoords[0][i*2+1] << endl;
+		ind = ind.substr(0, ind.size()-2);
+		cout << ind << "}\n\n";
+	}
+	if (flags & FLAGS_TEXTURED2) {
+		for (uint32 j = 0; j < numUVs; j++) {
+		cout << ind << "texCoords " << j << " {\n";
+		ind += "  ";
+		if (!detailed)
+			cout << ind << "skipping\n";
+		else
+			for (uint32 i = 0; i < texCoords[j].size()/2; i++)
+				cout << ind << texCoords[j][i*2+0]<< ", "
+					<< texCoords[j][i*2+1] << endl;
+		ind = ind.substr(0, ind.size()-2);
+		cout << ind << "}\n\n";
+		}
+	}
+
+	cout << ind << "faces {\n";
+	ind += "  ";
+	if (!detailed)
+		cout << ind << "skipping\n";
+	else
+		for (uint32 i = 0; i < faces.size()/4; i++)
+			cout << ind << faces[i*4+0] << ", "
+			            << faces[i*4+1] << ", "
+			            << faces[i*4+2] << ", "
+			            << faces[i*4+3] << endl;
+	ind = ind.substr(0, ind.size()-2);
+	cout << ind << "}\n\n";
+
+	cout << ind << "boundingSphere: ";
+	for (uint32 i = 0; i < 4; i++)
+		cout << boundingSphere[i] << " ";
+	cout << endl << endl;
+	cout << ind << "hasPositions: " << hasPositions << endl;
+	cout << ind << "hasNormals: " << hasNormals << endl;
+
+	cout << ind << "vertices {\n";
+	ind += "  ";
+	if (!detailed)
+		cout << ind << "skipping\n";
+	else
+		for (uint32 i = 0; i < vertices.size()/3; i++)
+			cout << ind << vertices[i*3+0] << ", "
+			            << vertices[i*3+1] << ", "
+			            << vertices[i*3+2] << endl;
+	ind = ind.substr(0, ind.size()-2);
+	cout << ind << "}\n";
+
+	if (flags & FLAGS_NORMALS) {
+		cout << ind << "normals {\n";
+		ind += "  ";
+		if (!detailed)
+			cout << ind << "skipping\n";
+		else
+			for (uint32 i = 0; i < normals.size()/3; i++)
+				cout << ind << normals[i*3+0] << ", "
+					    << normals[i*3+1] << ", "
+					    << normals[i*3+2] << endl;
+		ind = ind.substr(0, ind.size()-2);
+		cout << ind << "}\n";
+	}
+
+	cout << endl << ind << "MaterialList {\n";
+	ind += "  ";
+	cout << ind << "numMaterials: " << materialList.size() << endl;
+	for (uint32 i = 0; i < materialList.size(); i++)
+		materialList[i].dump(i, ind, detailed);
+	ind = ind.substr(0, ind.size()-2);
+	cout << ind << "}\n";
+
+	ind = ind.substr(0, ind.size()-2);
+	cout << ind << "}\n";
+}
+
 Geometry::Geometry(void)
 {
 	hasMorph = false;
@@ -864,6 +1061,29 @@ void Material::readExtension(ifstream &rw)
 	}
 }
 
+void Material::dump(uint32 index, string ind, bool detailed)
+{
+	cout << ind << "Material " << index << " {\n";
+	ind += "  ";
+
+	// unused
+//	cout << ind << "flags: " << hex << flags << endl;
+	cout << ind << "color: " << dec << int(color[0]) << " "
+	                         << int(color[1]) << " "
+	                         << int(color[2]) << " "
+	                         << int(color[3]) << endl;
+	// unused
+//	cout << ind << "unknown: " << hex << unknown << endl;
+	cout << ind << "surfaceProps: " << surfaceProps[0] << " "
+	                                << surfaceProps[1] << " "
+	                                << surfaceProps[2] << endl;
+	if (hasTex)
+		texture.dump(ind, detailed);
+
+	ind = ind.substr(0, ind.size()-2);
+	cout << ind << "}\n";
+}
+
 Material::Material(void)
 {
 	hasMatFx = false;
@@ -963,6 +1183,19 @@ void Texture::readExtension(ifstream &rw)
 			break;
 		}
 	}
+}
+
+void Texture::dump(std::string ind, bool detailed)
+{
+	cout << ind << "Texture {\n";
+	ind += "  ";
+
+	cout << ind << "filterFlags: " << hex << filterFlags << dec << endl;
+	cout << ind << "name: " << name << endl;
+	cout << ind << "maskName: " << maskName << endl;
+
+	ind = ind.substr(0, ind.size()-2);
+	cout << ind << "}\n";
 }
 
 Texture::Texture(void) { hasSkyMipmap = false; }

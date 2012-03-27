@@ -29,5 +29,17 @@ int main(int argc, char *argv[])
 	clump.write(out);
 	out.close();
 
+	bool detailed;
+	if (argc > 3) {
+		string flag = argv[3];
+		if (flag == "-d")
+			detailed = false;
+		else if (flag == "-dd")
+			detailed = true;
+		else
+			return 0;
+		clump.dump(detailed);
+	}
+
 	return 0;
 }
