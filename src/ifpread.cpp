@@ -10,6 +10,10 @@ using namespace std;
 			exit(1);\
 		}\
 		size = readUInt32(ifp);
+#else
+	#define READ_SECTION(x)\
+		fourcc = readUInt32(ifp);\
+		size = readUInt32(ifp);
 #endif
 
 namespace rw {

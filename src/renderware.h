@@ -549,6 +549,7 @@ struct TextureDictionary
 };
 
 
+#if 0
 enum {
 	ANP3 = 0x33504e41,
 	ANPK = 0x4b504e41,
@@ -612,6 +613,25 @@ struct AnimPackage
 	void read(std::ifstream &ifp);
 	void clear(void);
 };
+
+
+
+struct CollisionModel
+{
+	std::string name;
+	float32 boundingSphere[4];
+	float32 min[3];
+	float32 max[3];
+
+	std::vector<float32> spheres;
+	std::vector<float32> boxes;
+	std::vector<float32> vertices;
+	std::vector<float32> vertices;
+
+	/* functions */
+	void read(std::ifstream &col);
+};
+#endif
 
 }
 

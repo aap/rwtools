@@ -1,7 +1,7 @@
 OBJDIR = ../obj
 _OBJ = dffread.o dffwrite.o ps2native.o xboxnative.o txdread.o txdwrite.o\
-renderware.o ifpread.o
-_OBJPROG = dffconv.o txdconv.o txdex.o ifp.o
+renderware.o #ifpread.o colread.o
+_OBJPROG = dffconv.o txdconv.o txdex.o #ifp.o col.o
 OBJ = $(patsubst %,$(OBJDIR)/%,$(_OBJ))
 OBJPROG = $(patsubst %,$(OBJDIR)/%,$(_OBJPROG))
 HEADER = renderware.h
