@@ -14,9 +14,14 @@ void Clump::read(ifstream& rw)
 {
 	HeaderInfo header;
 
+	// TODO: this is only a quick and dirty fix for uv anim dicts
 	header.read(rw);
-	if (header.type != CHUNK_CLUMP)
-		return;
+	if (header.type != CHUNK_CLUMP) {
+		rw.seekg(header.length, ios::cur);
+		header.read(rw);
+		if (header.type != CHUNK_CLUMP)
+			return;
+	}
 
 	READ_HEADER(CHUNK_STRUCT);
 	uint32 numAtomics = readUInt32(rw);

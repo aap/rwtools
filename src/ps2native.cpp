@@ -53,9 +53,7 @@ void Geometry::readPs2NativeData(ifstream &rw)
 	vector<uint32> typesRead;
 	for (uint32 i = 0; i < splits.size(); i++) {
 		uint32 splitSize = readUInt32(rw);
-//		uint32 unk = readUInt32(rw);
-//		cout << hex << unk << " " << faceType << endl;
-		rw.seekg(4, ios::cur);
+		rw.seekg(4, ios::cur);	// bool: hasNoSectionAData
 
 		uint32 numIndices = splits[i].indices.size();
 		splits[i].indices.clear();
@@ -193,10 +191,9 @@ void Geometry::readData(uint32 vertexCount, uint32 type,
 		}
 		break;
 	} case 0x6D008001: {
-		size = 2 * sizeof(int16);	// 2 was 4
+		size = 2 * sizeof(int16);
 		int16 texCoord[2];
 		for (uint32 j = 0; j < vertexCount; j++) {
-			/* TODO: don't know if this is correct (should be) */
 			for (uint32 i = 0; i < numUVs; i++) {
 				rw.read((char *) (texCoord), size);
 				texCoords[i].push_back(texCoord[0] * UVSCALE);
@@ -286,8 +283,10 @@ void Geometry::readData(uint32 vertexCount, uint32 type,
 	}
 
 	/* skip padding */
-	if (vertexCount*size % 0x10 != 0)
-		rw.seekg(0x10 - vertexCount*size % 0x10, ios::cur);
+//	if (vertexCount*size % 0x10 != 0)
+//		rw.seekg(0x10 - vertexCount*size % 0x10, ios::cur);
+	if (vertexCount*size & 0xF)
+		rw.seekg(0x10 - (vertexCount*size & 0xF), ios::cur);
 }
 
 void Geometry::deleteOverlapping(vector<uint32> &typesRead, uint32 split)

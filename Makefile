@@ -35,4 +35,4 @@ install:
 	cp $(DFFBIN) $(HOME)/bin
 	cp $(TXDBIN) $(HOME)/bin
 	cp $(TXDEXBIN) $(HOME)/bin
-	cp $(IFPBIN) $(HOME)/bin
+#	cp $(IFPBIN) $(HOME)/bin
