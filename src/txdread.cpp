@@ -112,6 +112,7 @@ void NativeTexture::readD3d(ifstream &rw)
 		else
 			dxtCompression = 0;
 	}
+//	cout << hasAlpha << " " << name << endl;
 
 
 	if (rasterFormat & RASTER_PAL8 || rasterFormat & RASTER_PAL4) {
@@ -307,6 +308,7 @@ void NativeTexture::readPs2(ifstream &rw)
 	// 0x10000 means the texture is not swizzled and has no headers
 	// 0x20000 means swizzling information is contained in the header
 	// the rest is the same as the generic raster format
+//	cout << hex << rasterFormat << " " << depth;
 	bool hasHeader = (rasterFormat & 0x20000);
 
 	// only these are ever used (so alpha for all textures :/ )
@@ -316,6 +318,12 @@ void NativeTexture::readPs2(ifstream &rw)
 		hasAlpha = true;
 	else
 		hasAlpha = false;
+
+	hasAlpha = !(rasterFormat & 0x4000);
+//	cout << " " << maskName;
+	if (maskName != "")
+		hasAlpha = true;
+//	cout << " " << hasAlpha;
 
 	READ_HEADER(CHUNK_STRUCT);
 
@@ -358,6 +366,8 @@ void NativeTexture::readPs2(ifstream &rw)
 		i++;
 	} while (rw.tellg() < end);
 	mipmapCount = i;
+
+//	cout << " " << name << endl;
 
 	/* Palette */
 	// vc dyn_trash.txd is weird here
@@ -436,7 +446,7 @@ void NativeTexture::convertFromPS2(void)
 	if (platform != PLATFORM_PS2)
 		return;
 
-	hasAlpha = false;
+//	hasAlpha = false;
 	for (uint32 j = 0; j < mipmapCount; j++) {
 		bool swizzled = (swizzleHeight[j] != height[j]);
 
@@ -487,8 +497,8 @@ void NativeTexture::convertFromPS2(void)
 				uint32 newval = texels[j][i*4+3] * 0xff;
 				newval /= 0x80;
 				texels[j][i*4+3] = newval;
-				if (texels[j][i*4+3] != 0xFF)
-					hasAlpha = true;
+//				if (texels[j][i*4+3] != 0xFF)
+//					hasAlpha = true;
 			}
 		}
 	}
@@ -499,15 +509,15 @@ void NativeTexture::convertFromPS2(void)
 			newalpha /= 0x80;
 			palette[i*4+3] = newalpha;
 			// that sucks (and isn't really correct)
-			if (palette[i*4+3] != 0xFF &&
-			    palette[i*4+0] > 1 &&
-			    palette[i*4+1] > 1 &&
-			    palette[i*4+2] > 1)
-				hasAlpha = true;
+//			if (palette[i*4+3] != 0xFF &&
+//			    palette[i*4+0] > 1 &&
+//			    palette[i*4+1] > 1 &&
+//			    palette[i*4+2] > 1)
+//				hasAlpha = true;
 		}
 	}
-	if (maskName != "")
-		hasAlpha = true;
+//	if (maskName != "")
+//		hasAlpha = true;
 
 	platform = PLATFORM_D3D8;
 	dxtCompression = 0;
@@ -836,16 +846,56 @@ NativeTexture::NativeTexture(const NativeTexture &orig)
 	}
 }
 
-NativeTexture::~NativeTexture(void)
+NativeTexture &NativeTexture::operator=(const NativeTexture &that)
 {
-	if (palette != 0)
+	if (this != &that) {
+		platform = that.platform;
+		name = that.name;
+		maskName = that.maskName;
+		filterFlags = that.filterFlags;
+		rasterFormat = that.rasterFormat;
+		width = that.width;
+		height = that.height;
+		depth = that.depth;
+		dataSizes = that.dataSizes;
+
+		paletteSize = that.paletteSize;
+		hasAlpha = that.hasAlpha;
+		mipmapCount = that.mipmapCount;
+		swizzleWidth = that.swizzleWidth;
+		swizzleHeight = that.swizzleHeight;
+		dxtCompression = that.dxtCompression;
+
+
 		delete[] palette;
-	palette = 0;
-	for (uint32 i = 0; i < texels.size(); i++)
-		if (texels[i] != 0) {
+		palette = 0;
+		if (that.palette) {
+			palette = new uint8[that.paletteSize*4];
+			memcpy(palette, that.palette,	
+			       that.paletteSize*4*sizeof(uint8));
+		}
+
+		for (uint32 i = 0; i < texels.size(); i++) {
 			delete[] texels[i];
 			texels[i] = 0;
+			if (that.texels[i]) {
+				texels[i] = new uint8[that.dataSizes[i]];
+				memcpy(palette, that.palette,	
+				       that.dataSizes[i]*sizeof(uint8));
+			}
 		}
+	}
+	return *this;
+}
+
+NativeTexture::~NativeTexture(void)
+{
+	delete[] palette;
+	palette = 0;
+	for (uint32 i = 0; i < texels.size(); i++) {
+		delete[] texels[i];
+		texels[i] = 0;
+	}
 }
 
 

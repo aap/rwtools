@@ -133,10 +133,6 @@ void Clump::clear(void)
 	frameList.resize(0);
 }
 
-Clump::Clump(void) { }
-
-Clump::~Clump(void) { }
-
 /*
  * Atomic
  */
@@ -227,8 +223,6 @@ Atomic::Atomic(void)
 	hasPipelineSet = false;
 }
 
-Atomic::~Atomic(void) { }
-
 /*
  * Frame
  */
@@ -309,9 +303,11 @@ void Frame::dump(uint32 index, string ind, bool detailed)
 	cout << ind << "}\n";
 }
 
-Frame::Frame(void) { hasHAnim = false; hAnimBoneCount = 0;}
-
-Frame::~Frame(void) { }
+Frame::Frame(void)
+{
+	hasHAnim = false;
+	hAnimBoneCount = 0;
+}
 
 /*
  * Geometry
@@ -918,10 +914,61 @@ Geometry::Geometry(const Geometry &orig)
 		boundingSphere[i] = orig.boundingSphere[i];
 }
 
+Geometry &Geometry::operator=(const Geometry &that)
+{
+	if (this != &that) {
+		flags = that.flags;
+		numUVs = that.numUVs;
+		hasNativeGeometry = that.hasNativeGeometry;
+
+		vertexCount = that.vertexCount;
+		faces = that.faces;
+		vertexColors = that.vertexColors;
+		for (uint32 i = 0; i < 8; i++)
+			texCoords[i] = that.texCoords[i];
+
+		for (uint32 i = 0; i < 4; i++)
+			boundingSphere[i] = that.boundingSphere[i];
+
+		hasPositions = that.hasPositions;
+		hasNormals = that.hasNormals;
+		vertices = that.vertices;
+		normals = that.normals;
+		materialList = that.materialList;
+
+		faceType = that.faceType;
+		numIndices = that.numIndices;
+		splits = that.splits;
+
+		hasSkin = that.hasSkin;
+		boneCount = that.boneCount;
+		specialIndexCount = that.specialIndexCount;
+		unknown1 = that.unknown1;
+		unknown2 = that.unknown2;
+		specialIndices = that.specialIndices;
+		vertexBoneIndices = that.vertexBoneIndices;
+		vertexBoneWeights = that.vertexBoneWeights;
+		inverseMatrices = that.inverseMatrices;
+
+		hasMeshExtension = that.hasMeshExtension;
+		delete meshExtension;
+		meshExtension = 0;
+		if (that.meshExtension)
+			meshExtension = new MeshExtension(*that.meshExtension);
+
+		hasNightColors = that.hasNightColors;
+		nightColorsUnknown = that.nightColorsUnknown;
+		nightColors = that.nightColors;
+
+		hasMorph = that.hasMorph;
+	}
+	return *this;
+}
+
 Geometry::~Geometry(void)
 {
-	if (meshExtension != 0)
-		delete meshExtension;
+	delete meshExtension;
+	meshExtension = 0;
 }
 
 
@@ -1122,12 +1169,48 @@ Material::Material(const Material& orig)
 		reflectionChannelAmount[i] = orig.reflectionChannelAmount[i];
 }
 
+Material &Material::operator=(const Material &that)
+{
+	if (this != &that) {
+		flags = that.flags;
+		for (uint32 i = 0; i < 4; i++)
+			color[i] = that.color[i];
+		unknown = that.unknown;
+		hasTex = that.hasTex;
+		for (uint32 i = 0; i < 3; i++)
+			surfaceProps[i] = that.surfaceProps[i];
+
+		texture = that.texture;
+
+		hasRightToRender = that.hasRightToRender;
+		rightToRenderVal1 = that.rightToRenderVal1;
+		rightToRenderVal2 = that.rightToRenderVal2;
+
+		hasMatFx = that.hasMatFx;
+		delete matFx;
+		matFx = 0;
+		if (that.matFx)
+			matFx = new MatFx(*that.matFx);
+
+		hasReflectionMat = that.hasReflectionMat;
+		for (uint32 i = 0; i < 4; i++)
+			reflectionChannelAmount[i] =
+					that.reflectionChannelAmount[i];
+		reflectionIntensity = that.reflectionIntensity;
+
+		hasSpecularMat = that.hasSpecularMat;
+		specularLevel = that.specularLevel;
+		specularName = that.specularName;
+	}
+	return *this;
+}
+
 Material::~Material(void)
 {
-	if (matFx != 0)
-		delete matFx;
+	delete matFx;
 	matFx = 0;
 }
+
 
 MatFx::MatFx(void)
 {
@@ -1204,7 +1287,5 @@ void Texture::dump(std::string ind, bool detailed)
 }
 
 Texture::Texture(void) { hasSkyMipmap = false; }
-
-Texture::~Texture(void) { }
 
 }

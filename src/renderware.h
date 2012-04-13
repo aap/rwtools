@@ -243,7 +243,6 @@ struct Frame
 	void dump(uint32 index, std::string ind = "", bool detailed = false);
 
 	Frame(void);
-	~Frame(void);
 };
 
 
@@ -276,8 +275,8 @@ struct Atomic
 	void readExtension(std::ifstream &dff);
 	uint32 write(std::ofstream &dff);
 	void dump(uint32 index, std::string ind = "", bool detailed = false);
+
 	Atomic(void);
-	~Atomic(void);
 };
 
 struct Texture
@@ -298,7 +297,6 @@ struct Texture
 	void dump(std::string ind = "", bool detailed = false);
 
 	Texture(void);
-	~Texture(void);
 };
 
 struct MatFx
@@ -363,6 +361,7 @@ struct Material
 
 	Material(void);
 	Material(const Material &orig);
+	Material &operator=(const Material &that);
 	~Material(void);
 };
 
@@ -453,6 +452,7 @@ struct Geometry
 
 	Geometry(void);
 	Geometry(const Geometry &orig);
+	Geometry &operator= (const Geometry &other);
 	~Geometry(void);
 private:
 	void readPs2NativeData(std::ifstream &dff);
@@ -484,8 +484,6 @@ struct Clump
 	uint32 write(std::ofstream &dff);
 	void dump(bool detailed = false);
 	void clear(void);
-	Clump(void);
-	~Clump(void);
 };
 
 /*
@@ -535,6 +533,7 @@ struct NativeTexture
 
 	NativeTexture(void);
 	NativeTexture(const NativeTexture &orig);
+	NativeTexture &operator=(const NativeTexture &that);
 	~NativeTexture(void);
 };
 
@@ -547,91 +546,6 @@ struct TextureDictionary
 	uint32 write(std::ofstream &txd);
 	void clear(void);
 };
-
-
-#if 0
-enum {
-	ANP3 = 0x33504e41,
-	ANPK = 0x4b504e41,
-	INFO = 0x4f464e49,
-	NAME = 0x454d414e,
-	DGAN = 0x4e414744,
-	CPAN = 0x4e415043,
-	ANIM = 0x4d494e41,
-	KR00 = 0x3030524b,
-	KRT0 = 0x3054524b,
-	KRTS = 0x5354524b
-};
-
-/* Not Renderware actually */
-
-struct KeyFrame
-{
-	uint32 type;
-	float32 rot[4];
-	float32 pos[3];
-	float32 scale[3];
-	float32 timeKey;
-
-	/* functions */
-	void read_1(uint32 fourcc, std::ifstream &ifp);
-	void read_3(std::ifstream &ifp, uint32 type);
-};
-
-struct AnimObj
-{
-	std::string name;
-	int32 frames;
-	int32 unknown;
-	int32 next;
-	int32 prev;
-
-	std::vector<KeyFrame> frmList;
-
-	/* functions */
-	void read_1(std::ifstream &ifp);
-	void read_3(std::ifstream &ifp);
-};
-
-struct Animation
-{
-	std::string name;
-	std::vector<AnimObj> objList;
-
-	/* functions */
-	void read_1(std::ifstream &ifp);
-	void read_3(std::ifstream &ifp);
-	void clear(void);
-};
-
-struct AnimPackage
-{
-	std::vector<Animation> animList;
-	std::string name;
-
-	/* functions */
-	void read(std::ifstream &ifp);
-	void clear(void);
-};
-
-
-
-struct CollisionModel
-{
-	std::string name;
-	float32 boundingSphere[4];
-	float32 min[3];
-	float32 max[3];
-
-	std::vector<float32> spheres;
-	std::vector<float32> boxes;
-	std::vector<float32> vertices;
-	std::vector<float32> vertices;
-
-	/* functions */
-	void read(std::ifstream &col);
-};
-#endif
 
 }
 
