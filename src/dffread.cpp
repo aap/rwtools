@@ -128,9 +128,9 @@ void Clump::dump(bool detailed)
 
 void Clump::clear(void)
 {
-	atomicList.resize(0);
-	geometryList.resize(0);
-	frameList.resize(0);
+	atomicList.clear();
+	geometryList.clear();
+	frameList.clear();
 }
 
 /*
@@ -968,7 +968,6 @@ Geometry &Geometry::operator=(const Geometry &that)
 Geometry::~Geometry(void)
 {
 	delete meshExtension;
-	meshExtension = 0;
 }
 
 
@@ -1208,7 +1207,6 @@ Material &Material::operator=(const Material &that)
 Material::~Material(void)
 {
 	delete matFx;
-	matFx = 0;
 }
 
 

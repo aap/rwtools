@@ -112,7 +112,7 @@ void NativeTexture::readD3d(ifstream &rw)
 		else
 			dxtCompression = 0;
 	}
-//	cout << hasAlpha << " " << name << endl;
+//	cout << hasAlpha << " " << maskName << " " << name << endl;
 
 
 	if (rasterFormat & RASTER_PAL8 || rasterFormat & RASTER_PAL4) {
@@ -290,13 +290,16 @@ void NativeTexture::readPs2(ifstream &rw)
 	height.push_back(readUInt32(rw));
 	depth = readUInt32(rw);
 	rasterFormat = readUInt32(rw);
-/*
+
+
 	uint32 unk1 = readUInt32(rw);		// what are these?
 	uint32 unk2 = readUInt32(rw);
 	uint32 unk3 = readUInt32(rw);
 	uint32 unk4 = readUInt32(rw);
-*/
+/*
 	rw.seekg(4*4, ios::cur);
+*/
+//	cout << hex << unk3;
 
 	rw.seekg(4*4, ios::cur);		// constant
 	uint32 dataSize = readUInt32(rw);	// texels + header
@@ -308,18 +311,21 @@ void NativeTexture::readPs2(ifstream &rw)
 	// 0x10000 means the texture is not swizzled and has no headers
 	// 0x20000 means swizzling information is contained in the header
 	// the rest is the same as the generic raster format
-//	cout << hex << rasterFormat << " " << depth;
+//	cout << hex << " " << rasterFormat << " " << depth;
 	bool hasHeader = (rasterFormat & 0x20000);
 
 	// only these are ever used (so alpha for all textures :/ )
+	hasAlpha = false;
+/*
 	if ((rasterFormat & RASTER_1555) ||
 	    (rasterFormat & RASTER_4444) ||
 	    (rasterFormat & RASTER_8888))
 		hasAlpha = true;
 	else
 		hasAlpha = false;
+*/
 
-	hasAlpha = !(rasterFormat & 0x4000);
+//	hasAlpha = !(rasterFormat & 0x4000);
 //	cout << " " << maskName;
 	if (maskName != "")
 		hasAlpha = true;
@@ -385,7 +391,7 @@ void NativeTexture::readPs2(ifstream &rw)
 		}
 
 		paletteSize = (rasterFormat & RASTER_PAL8) ? 0x100 : 0x10;
-		palette = new uint8[paletteSize*4*sizeof(uint8)];
+		palette = new uint8[paletteSize*4];
 		rw.read(reinterpret_cast <char *> (palette),
 			paletteSize*4*sizeof(uint8));
 
@@ -871,7 +877,7 @@ NativeTexture &NativeTexture::operator=(const NativeTexture &that)
 		palette = 0;
 		if (that.palette) {
 			palette = new uint8[that.paletteSize*4];
-			memcpy(palette, that.palette,	
+			memcpy(&palette[0], &that.palette[0],
 			       that.paletteSize*4*sizeof(uint8));
 		}
 
@@ -880,7 +886,7 @@ NativeTexture &NativeTexture::operator=(const NativeTexture &that)
 			texels[i] = 0;
 			if (that.texels[i]) {
 				texels[i] = new uint8[that.dataSizes[i]];
-				memcpy(palette, that.palette,	
+				memcpy(&texels[i][0], &that.texels[i][0],
 				       that.dataSizes[i]*sizeof(uint8));
 			}
 		}
