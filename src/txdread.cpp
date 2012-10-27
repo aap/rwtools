@@ -180,7 +180,8 @@ void NativeTexture::readXbox(ifstream &rw)
 	mipmapCount = readUInt8(rw);
 	rw.seekg(sizeof(int8), ios::cur); // raster type (always 4)
 	dxtCompression = readUInt8(rw);
-	uint32 size = readUInt32(rw);
+//	uint32 size = readUInt32(rw);
+	rw.seekg(sizeof(int32), ios::cur);
 
 	paletteSize = (rasterFormat & RASTER_PAL8) ? 0x100 :
 		      ((rasterFormat & RASTER_PAL4) ? 0x20 /* ! */ : 0);
@@ -296,9 +297,7 @@ void NativeTexture::readPs2(ifstream &rw)
 	uint32 unk2 = readUInt32(rw);
 	uint32 unk3 = readUInt32(rw);
 	uint32 unk4 = readUInt32(rw);
-/*
-	rw.seekg(4*4, ios::cur);
-*/
+//	rw.seekg(4*4, ios::cur);
 //	cout << hex << unk3;
 
 	rw.seekg(4*4, ios::cur);		// constant
@@ -314,9 +313,8 @@ void NativeTexture::readPs2(ifstream &rw)
 //	cout << hex << " " << rasterFormat << " " << depth;
 	bool hasHeader = (rasterFormat & 0x20000);
 
-	// only these are ever used (so alpha for all textures :/ )
-	hasAlpha = false;
 /*
+	// only these are ever used (so alpha for all textures :/ )
 	if ((rasterFormat & RASTER_1555) ||
 	    (rasterFormat & RASTER_4444) ||
 	    (rasterFormat & RASTER_8888))
@@ -324,10 +322,13 @@ void NativeTexture::readPs2(ifstream &rw)
 	else
 		hasAlpha = false;
 */
+	hasAlpha = false;
 
 //	hasAlpha = !(rasterFormat & 0x4000);
 //	cout << " " << maskName;
 	if (maskName != "")
+		hasAlpha = true;
+	if (depth == 16)
 		hasAlpha = true;
 //	cout << " " << hasAlpha;
 
@@ -388,6 +389,7 @@ void NativeTexture::readPs2(ifstream &rw)
 			rw.seekg(6*4, ios::cur); // same in every txd
 			unkh4 = readUInt32(rw);
 			rw.seekg(3*4, ios::cur); // same in every txd
+//			rw.seekg(0x50, ios::cur);
 		}
 
 		paletteSize = (rasterFormat & RASTER_PAL8) ? 0x100 : 0x10;

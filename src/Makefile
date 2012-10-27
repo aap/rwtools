@@ -6,7 +6,7 @@ OBJ = $(patsubst %,$(OBJDIR)/%,$(_OBJ))
 OBJPROG = $(patsubst %,$(OBJDIR)/%,$(_OBJPROG))
 HEADER = renderware.h
 CC = g++
-CFLAGS = -Wall -g -DDEBUG
+CFLAGS = -Wall -Wextra -g -DDEBUG -O3
 
 dfftools: $(OBJ) $(OBJPROG)
 	ar scr ../librwtools.a $(OBJ)

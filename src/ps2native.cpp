@@ -283,8 +283,6 @@ void Geometry::readData(uint32 vertexCount, uint32 type,
 	}
 
 	/* skip padding */
-//	if (vertexCount*size % 0x10 != 0)
-//		rw.seekg(0x10 - vertexCount*size % 0x10, ios::cur);
 	if (vertexCount*size & 0xF)
 		rw.seekg(0x10 - (vertexCount*size & 0xF), ios::cur);
 }

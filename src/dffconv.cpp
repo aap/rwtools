@@ -1,3 +1,5 @@
+#include <cstdlib>
+#include <cstdio>
 #include "renderware.h"
 using namespace std;
 
@@ -12,7 +14,15 @@ int main(int argc, char *argv[])
 		cerr << "type size not correct\n";
 	}
 	if (argc < 3) {
-		cerr << "usage: " << argv[0] << " in_dff out_dff\n";
+		cerr << "usage: " << argv[0] << " in_dff out_dff " <<
+		        "[-c] ([-v version_string] or [-V version]) " <<
+		        " ([-d] or [-dd])\n";
+		cout << "Flags must be set in the above order.\n";
+		cerr << "-c: Clean up geometries; advised for PS2 dffs.\n";
+		cerr << "-v: Known versions: GTA3, GTAVC_1, GTAVC_2, GTASA\n";
+		cerr << "-V: Set any version you like in hexadecimal.\n";
+		cerr << "-d: Dump dff data.\n";
+		cerr << "-dd: Dump dff data detailed.\n";
 		return 1;
 	}
 	filename = argv[1];
@@ -21,17 +31,53 @@ int main(int argc, char *argv[])
 	clump.read(dff);
 	dff.close();
 
-	for (uint32 i = 0; i < clump.geometryList.size(); i++)
-		clump.geometryList[i].cleanUp();
+	ofstream out(argv[2], ios::binary);
+
+	int curArg = 3;
+
+	string arg;
+	// -c flag cleans up geometries
+	if (argc > curArg) {
+		arg = argv[curArg];
+		if (arg == "-c") {
+			for (uint32 i = 0; i < clump.geometryList.size(); i++)
+				clump.geometryList[i].cleanUp();
+			curArg++;
+			cout << "cleaning up\n";
+		}
+	}
 
 	version = VCPC;
-	ofstream out(argv[2], ios::binary);
+
+	if (argc > curArg + 1) {
+		arg = argv[curArg];
+		if (arg == "-v") {
+			string verstring = argv[curArg+1];
+			curArg += 2;
+			if (verstring == "GTA3")
+				version = GTA3_3;
+			else if (verstring == "GTAVC_1")
+				version = VCPS2;
+			else if (verstring == "GTAVC_2")
+				version = VCPC;
+			else if (verstring == "GTASA")
+				version = SA;
+			else
+				cout << "unknown version\n";
+		}
+		if (arg == "-V") {
+			sscanf(argv[curArg+1], "%lx", &version);
+			curArg += 2;
+		}
+		cout << "writing version: " << hex << version << endl;
+	}
+
 	clump.write(out);
 	out.close();
 
 	bool detailed;
-	if (argc > 3) {
-		string flag = argv[3];
+	if (argc > curArg) {
+		string flag = argv[curArg];
 		if (flag == "-d")
 			detailed = false;
 		else if (flag == "-dd")

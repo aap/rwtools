@@ -240,7 +240,7 @@ struct Frame
 	uint32 writeStruct(std::ofstream &dff);
 	uint32 writeExtension(std::ofstream &dff);
 
-	void dump(uint32 index, std::string ind = "", bool detailed = false);
+	void dump(uint32 index, std::string ind = "");
 
 	Frame(void);
 };
@@ -248,8 +248,8 @@ struct Frame
 
 struct Atomic
 {
-	uint32 frameIndex;
-	uint32 geometryIndex;
+	int32 frameIndex;
+	int32 geometryIndex;
 
 	/* Extensions */
 
@@ -274,7 +274,7 @@ struct Atomic
 	void read(std::ifstream &dff);
 	void readExtension(std::ifstream &dff);
 	uint32 write(std::ofstream &dff);
-	void dump(uint32 index, std::string ind = "", bool detailed = false);
+	void dump(uint32 index, std::string ind = "");
 
 	Atomic(void);
 };
@@ -294,7 +294,7 @@ struct Texture
 	void read(std::ifstream &dff);
 	uint32 write(std::ofstream &dff);
 	void readExtension(std::ifstream &dff);
-	void dump(std::string ind = "", bool detailed = false);
+	void dump(std::string ind = "");
 
 	Texture(void);
 };
@@ -357,7 +357,7 @@ struct Material
 	void readExtension(std::ifstream &dff);
 	uint32 write(std::ofstream &dff);
 
-	void dump(uint32 index, std::string ind = "", bool detailed = false);
+	void dump(uint32 index, std::string ind = "");
 
 	Material(void);
 	Material(const Material &orig);

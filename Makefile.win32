@@ -1,21 +1,19 @@
 OBJDIR=obj
 _OBJ=dffread.obj dffwrite.obj ps2native.obj xboxnative.obj txdread.obj\
-txdwrite.obj renderware.obj ifpread.obj
+txdwrite.obj renderware.obj
 OBJ = $(OBJDIR)\$(_OBJ: = obj\) # can't subsitute $(OBJDIR) here
 CC = cl
 CFLAGS=/EHsc /DDEBUG
 DFFBIN=dffconv.exe
 TXDBIN=txdconv.exe
 TXDEXBIN=txdex.exe
-IFPBIN=ifp.exe
 
-build: $(OBJ) obj/dffconv.obj obj/txdconv.obj obj/txdex.obj obj/ifp.obj
+build: $(OBJ) obj/dffconv.obj obj/txdconv.obj obj/txdex.obj
 	$(CC) $(CFLAGS) $(OBJ) obj/dffconv.obj /Fe$(DFFBIN)
 	$(CC) $(CFLAGS) $(OBJ) obj/txdconv.obj /Fe$(TXDBIN)
 	$(CC) $(CFLAGS) $(OBJ) obj/txdex.obj /Fe$(TXDEXBIN)
-	$(CC) $(CFLAGS) $(OBJ) obj/ifp.obj /Fe$(IFPBIN)
 
-$(OBJ) obj/dffconv.obj obj/txdconv.obj obj/txdex.obj obj/ifp.obj:
+$(OBJ) obj/dffconv.obj obj/txdconv.obj obj/txdex.obj:
 	cd src && nmake -f Makefile.win32
 
 clean:

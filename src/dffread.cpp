@@ -53,11 +53,8 @@ void Clump::read(ifstream& rw)
 		geometryList[i].read(rw);
 
 	/* read atomics */
-	for (uint32 i = 0; i < numAtomics; i++) {
+	for (uint32 i = 0; i < numAtomics; i++)
 		atomicList[i].read(rw);
-//		cout << i << " " << frameList[atomicList[i].frameIndex].name
-//		        << " " << atomicList[i].geometryIndex << endl;
-	}
 
 	/* skip lights */
 	for (uint32 i = 0; i < numLights; i++) {
@@ -76,7 +73,7 @@ void Clump::readExtension(ifstream &rw)
 
 	READ_HEADER(CHUNK_EXTENSION);
 
-	uint32 end = rw.tellg();
+	streampos end = rw.tellg();
 	end += header.length;
 
 	while (rw.tellg() < end) {
@@ -103,8 +100,7 @@ void Clump::dump(bool detailed)
 	ind += "  ";
 	cout << ind << "numFrames: " << frameList.size() << endl;
 	for (uint32 i = 0; i < frameList.size(); i++)
-		frameList[i].dump(i, ind, detailed);
-//		dumpFrame(frameList[i], i, ind);
+		frameList[i].dump(i, ind);
 	ind = ind.substr(0, ind.size()-2);
 	cout << ind << "}\n";
 
@@ -113,14 +109,12 @@ void Clump::dump(bool detailed)
 	cout << ind << "numGeometries: " << geometryList.size() << endl;
 	for (uint32 i = 0; i < geometryList.size(); i++)
 		geometryList[i].dump(i, ind, detailed);
-//		dumpGeometry(geometryList[i], i, ind);
 
 	ind = ind.substr(0, ind.size()-2);
 	cout << ind << "}\n\n";
 
 	for (uint32 i = 0; i < atomicList.size(); i++)
-		atomicList[i].dump(i, ind, detailed);
-//		dumpAtomic(atomicList[i], i, ind);
+		atomicList[i].dump(i, ind);
 
 	ind = ind.substr(0, ind.size()-2);
 	cout << ind << "}\n";
@@ -157,7 +151,7 @@ void Atomic::readExtension(ifstream &rw)
 
 	READ_HEADER(CHUNK_EXTENSION);
 
-	uint32 end = rw.tellg();
+	streampos end = rw.tellg();
 	end += header.length;
 
 	while (rw.tellg() < end) {
@@ -187,7 +181,7 @@ void Atomic::readExtension(ifstream &rw)
 	}
 }
 
-void Atomic::dump(uint32 index, string ind, bool detailed)
+void Atomic::dump(uint32 index, string ind)
 {
 	cout << ind << "Atomic " << index << " {\n";
 	ind += "  ";
@@ -242,7 +236,7 @@ void Frame::readExtension(ifstream &rw)
 
 	READ_HEADER(CHUNK_EXTENSION);
 
-	uint32 end = rw.tellg();
+	streampos end = rw.tellg();
 	end += header.length;
 
 	while (rw.tellg() < end) {
@@ -279,7 +273,7 @@ void Frame::readExtension(ifstream &rw)
 	}
 }
 
-void Frame::dump(uint32 index, string ind, bool detailed)
+void Frame::dump(uint32 index, string ind)
 {
 	cout << ind << "Frame " << index << " {\n";
 	ind += "  ";
@@ -393,7 +387,7 @@ void Geometry::readExtension(ifstream &rw)
 
 	READ_HEADER(CHUNK_EXTENSION);
 
-	uint32 end = rw.tellg();
+	streampos end = rw.tellg();
 	end += header.length;
 
 	while (rw.tellg() < end) {
@@ -415,7 +409,7 @@ void Geometry::readExtension(ifstream &rw)
 			}
 			break;
 		} case CHUNK_NATIVEDATA: {
-			uint32 beg = rw.tellg();
+			streampos beg = rw.tellg();
 			rw.seekg(0x0c, ios::cur);
 			uint32 platform = readUInt32(rw);
 			rw.seekg(beg, ios::beg);
@@ -456,11 +450,11 @@ void Geometry::readExtension(ifstream &rw)
 			break;
 		} case CHUNK_SKIN: {
 			if (hasNativeGeometry) {
-				uint32 beg = rw.tellg();
+				streampos beg = rw.tellg();
 				rw.seekg(0x0c, ios::cur);
 				uint32 platform = readUInt32(rw);
 				rw.seekg(beg, ios::beg);
-				uint32 end = beg+header.length;
+//				streampos end = beg+header.length;
 				if (platform == PLATFORM_PS2) {
 					hasSkin = true;
 					readPs2NativeSkin(rw);
@@ -589,9 +583,9 @@ void Geometry::generateFaces(void)
 {
 	faces.clear();
 
-	if (faceType == FACETYPE_STRIP)
-		for (uint32 i = 0; i < splits.size(); i++) {
-			Split &s = splits[i];
+	for (uint32 i = 0; i < splits.size(); i++) {
+		Split &s = splits[i];
+		if (faceType == FACETYPE_STRIP)
 			for (uint32 j = 0; j < s.indices.size()-2; j++) {
 				if (isDegenerateFace(s.indices[j+0],
 				    s.indices[j+1], s.indices[j+2]))
@@ -601,17 +595,14 @@ void Geometry::generateFaces(void)
 				faces.push_back(s.matIndex);
 				faces.push_back(s.indices[j+2 - (j%2)]);
 			}
-		}
-	else
-		for (uint32 i = 0; i < splits.size(); i++) {
-			Split &s = splits[i];
+		else
 			for (uint32 j = 0; j < s.indices.size()-2; j+=3) {
 				faces.push_back(s.indices[j+1]);
 				faces.push_back(s.indices[j+0]);
 				faces.push_back(s.matIndex);
 				faces.push_back(s.indices[j+2]);
 			}
-		}
+	}
 }
 
 // these hold the (temporary) cleaned up data
@@ -868,7 +859,7 @@ void Geometry::dump(uint32 index, string ind, bool detailed)
 	ind += "  ";
 	cout << ind << "numMaterials: " << materialList.size() << endl;
 	for (uint32 i = 0; i < materialList.size(); i++)
-		materialList[i].dump(i, ind, detailed);
+		materialList[i].dump(i, ind);
 	ind = ind.substr(0, ind.size()-2);
 	cout << ind << "}\n";
 
@@ -1000,7 +991,7 @@ void Material::readExtension(ifstream &rw)
 
 	READ_HEADER(CHUNK_EXTENSION);
 
-	uint32 end = rw.tellg();
+	streampos end = rw.tellg();
 	end += header.length;
 
 	while (rw.tellg() < end) {
@@ -1112,7 +1103,7 @@ void Material::readExtension(ifstream &rw)
 	}
 }
 
-void Material::dump(uint32 index, string ind, bool detailed)
+void Material::dump(uint32 index, string ind)
 {
 	cout << ind << "Material " << index << " {\n";
 	ind += "  ";
@@ -1129,7 +1120,7 @@ void Material::dump(uint32 index, string ind, bool detailed)
 	                                << surfaceProps[1] << " "
 	                                << surfaceProps[2] << endl;
 	if (hasTex)
-		texture.dump(ind, detailed);
+		texture.dump(ind);
 
 	ind = ind.substr(0, ind.size()-2);
 	cout << ind << "}\n";
@@ -1244,6 +1235,7 @@ void Texture::read(ifstream &rw)
 	rw.read(buffer, header.length);
 	buffer[header.length] = '\0';
 	maskName = buffer;
+	delete[] buffer;
 
 	readExtension(rw);
 }
@@ -1254,7 +1246,7 @@ void Texture::readExtension(ifstream &rw)
 
 	READ_HEADER(CHUNK_EXTENSION);
 
-	uint32 end = rw.tellg();
+	streampos end = rw.tellg();
 	end += header.length;
 
 	while (rw.tellg() < end) {
@@ -1271,7 +1263,7 @@ void Texture::readExtension(ifstream &rw)
 	}
 }
 
-void Texture::dump(std::string ind, bool detailed)
+void Texture::dump(std::string ind)
 {
 	cout << ind << "Texture {\n";
 	ind += "  ";

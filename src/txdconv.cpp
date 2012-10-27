@@ -12,7 +12,11 @@ int main(int argc, char *argv[])
 		cerr << "type size not correct\n";
 	}
 	if (argc < 3) {
-		cerr << "Usage: " << argv[0] << " txd_in txd_out\n";
+		cerr << "usage: " << argv[0] << " in.txd out.txd " <<
+		        "([-v version_string] or [-V version])\n";
+		cout << "Flags must be set in the above order.\n";
+		cerr << "-v: Known versions: GTA3, GTAVC_1, GTAVC_2, GTASA\n";
+		cerr << "-V: Set any version you like in hexadecimal.\n";
 		return 1;
 	}
 	filename = argv[1];
@@ -31,7 +35,35 @@ int main(int argc, char *argv[])
 	}
 
 	ofstream out(argv[2], ios::binary);
-	version = VCPS2;
+	
+	int curArg = 3;
+
+	version = VCPC;
+
+	string arg;
+	if (argc > curArg + 1) {
+		arg = argv[curArg];
+		if (arg == "-v") {
+			string verstring = argv[curArg+1];
+			curArg += 2;
+			if (verstring == "GTA3")
+				version = GTA3_3;
+			else if (verstring == "GTAVC_1")
+				version = VCPS2;
+			else if (verstring == "GTAVC_2")
+				version = VCPC;
+			else if (verstring == "GTASA")
+				version = SA;
+			else
+				cout << "unknown version\n";
+		}
+		if (arg == "-V") {
+			sscanf(argv[curArg+1], "%lx", &version);
+			curArg += 2;
+		}
+		cout << "writing version: " << hex << version << endl;
+	}
+
 	txd.write(out);
 	out.close();
 }
