@@ -267,7 +267,10 @@ uint32 Geometry::write(ofstream &rw)
 			generateFaces();
 
 		bytesWritten += writeUInt16(flags, rw);
-		bytesWritten += writeUInt8(numUVs, rw);
+		if (flags & FLAGS_TEXTURED2)
+			bytesWritten += writeUInt8(numUVs, rw);
+		else
+			bytesWritten += writeUInt8(0, rw);
 
 		/* we can't write native geometry */
 		bytesWritten += writeUInt8(0, rw);

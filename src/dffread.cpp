@@ -316,6 +316,8 @@ void Geometry::read(ifstream &rw)
 	READ_HEADER(CHUNK_STRUCT);
 	flags = readUInt16(rw);
 	numUVs = readUInt8(rw);
+	if (flags & FLAGS_TEXTURED)
+		numUVs = 1;
 	hasNativeGeometry = readUInt8(rw);
 	uint32 triangleCount = readUInt32(rw);
 	vertexCount = readUInt32(rw);
