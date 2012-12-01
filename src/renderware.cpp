@@ -117,4 +117,92 @@ float32 readFloat32(ifstream &rw)
 	return tmp;
 }
 
+const char *chunks[] = { "None", "Struct", "String", "Extension", "Unknown",
+	"Camera", "Texture", "Material", "Material List", "Atomic Section",
+	"Plane Section", "World", "Spline", "Matrix", "Frame List",
+	"Geometry", "Clump", "Unknown", "Light", "Unicode String", "Atomic",
+	"Texture Native", "Texture Dictionary", "Animation Database",
+	"Image", "Skin Animation", "Geometry List", "Anim Animation",
+	"Team", "Crowd", "Delta Morph Animation", "Right To Render",
+	"MultiTexture Effect Native", "MultiTexture Effect Dictionary",
+	"Team Dictionary", "Platform Independet Texture Dictionary",
+	"Table of Contents", "Particle Standard Global Data", "AltPipe",
+	"Platform Independet Peds", "Patch Mesh", "Chunk Group Start",
+	"Chunk Group End", "UV Animation Dictionary", "Coll Tree"
+};
+
+/* From 0x0101 through 0x0135 */
+const char *toolkitchunks0[] = { "Metrics PLG", "Spline PLG", "Stereo PLG",
+	"VRML PLG", "Morph PLG", "PVS PLG", "Memory Leak PLG", "Animation PLG",
+	"Gloss PLG", "Logo PLG", "Memory Info PLG", "Random PLG",
+	"PNG Image PLG", "Bone PLG", "VRML Anim PLG", "Sky Mipmap Val",
+	"MRM PLG", "LOD Atomic PLG", "ME PLG", "Lightmap PLG",
+	"Refine PLG", "Skin PLG", "Label PLG", "Particles PLG", "GeomTX PLG",
+	"Synth Core PLG", "STQPP PLG",
+	"Part PP PLG", "Collision PLG", "HAnim PLG", "User Data PLG",
+	"Material Effects PLG", "Particle System PLG", "Delta Morph PLG",
+	"Patch PLG", "Team PLG", "Crowd PP PLG", "Mip Split PLG",
+	"Anisotrophy PLG", "Not used", "GCN Material PLG", "Geometric PVS PLG",
+	"XBOX Material PLG", "Multi Texture PLG", "Chain PLG", "Toon PLG",
+	"PTank PLG", "Particle Standard PLG", "PDS PLG", "PrtAdv PLG",
+	"Normal Map PLG", "ADC PLG", "UV Animation PLG"
+};
+
+/* From 0x0180 through 0x01c1 */
+const char *toolkitchunks1[] = {
+	"Character Set PLG", "NOHS World PLG", "Import Util PLG",
+	"Slerp PLG", "Optim PLG", "TL World PLG", "Database PLG",
+	"Raytrace PLG", "Ray PLG", "Library PLG",
+	"Not used", "Not used", "Not used", "Not used", "Not used", "Not used",
+	"2D PLG", "Tile Render PLG", "JPEG Image PLG", "TGA Image PLG",
+	"GIF Image PLG", "Quat PLG", "Spline PVS PLG", "Mipmap PLG",
+	"MipmapK PLG", "2D Font", "Intersection PLG", "TIFF Image PLG",
+	"Pick PLG", "BMP Image PLG", "RAS Image PLG", "Skin FX PLG",
+	"VCAT PLG", "2D Path", "2D Brush", "2D Object", "2D Shape", "2D Scene",
+	"2D Pick Region", "2D Object String", "2D Animation PLG",
+	"2D Animation",
+	"Not used", "Not used", "Not used", "Not used", "Not used", "Not used",
+	"2D Keyframe", "2D Maestro", "Barycentric",
+	"Platform Independent Texture Dictionary TK", "TOC TK", "TPL TK",
+	"AltPipe TK", "Animation TK", "Skin Split Tookit", "Compressed Key TK",
+	"Geometry Conditioning PLG", "Wing PLG", "Generic Pipeline TK",
+	"Lightmap Conversion TK", "Filesystem PLG", "Dictionary TK",
+	"UV Animation Linear", "UV Animation Parameter"
+};
+
+const char *RSchunks[] = { "Unused 1", "Unused 2", "Unused 3",
+	"Pipeline Set", "Unused 5", "Unused 6", "Specular Material",
+	"Unused 8", "2dfx", "Night Vertex Colors", "Collision Model",
+	"Unused 12", "Reflection Material", "Mesh Extension", "Frame",
+	"Unused 16"
+};
+
+string getChunkName(uint32 i)
+{
+	switch (i) {
+	case 0x50E:
+		return "Bin Mesh PLG";
+		break;
+	case 0x510:
+		return "Native Data PLG";
+		break;
+	case 0xF21E:
+		return "ZModeler Lock";
+		break;
+	default:
+		break;
+	}
+
+	if (i <= 45)
+		return chunks[i];
+	else if (i <= 0x0253F2FF && i >= 0x0253F2F0)
+		return RSchunks[i-0x0253F2F0];
+	else if (i <= 0x0135 && i >= 0x0101)
+		return toolkitchunks0[i-0x0101];
+	else if (i <= 0x01C0 && i >= 0x0181)
+		return toolkitchunks1[i-0x0181];
+	else
+		return "Unknown";
+}
+
 }

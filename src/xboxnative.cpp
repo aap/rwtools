@@ -37,6 +37,7 @@ void Geometry::readXboxNativeSkin(ifstream &rw)
 	// 1: number of weights
 	// 2: pointer?
 	// 3: skin data size per vertex (3*numweights)
+	// tab1 maps indices to bones tab2 maps bones to indices
 	uint32 numWeights = skinHeader[1];
 
 	float32 weights[4];
@@ -45,9 +46,11 @@ void Geometry::readXboxNativeSkin(ifstream &rw)
 		weights[0] = weights[1] = weights[2] = weights[3] = 0.0;
 		indices[0] = indices[1] = indices[2] = indices[3] = 0;
 
-		for (uint32 j = 0; j < numWeights; j++) {
-			weights[j] = readUInt8(rw);
-			weights[j] /= 255.0;
+		for (uint32 j = 0; j < 4; j++) {
+			if (j < numWeights) {
+				weights[j] = readUInt8(rw);
+				weights[j] /= 255.0;
+			}
 			vertexBoneWeights.push_back(weights[j]);
 		}
 
