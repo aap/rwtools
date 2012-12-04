@@ -8,14 +8,14 @@ OBJ := $(patsubst $(SRCDIR)/%.cpp,$(BUILDDIR)/%.o,$(SRC))
 OBJ2 := $(patsubst $(SRCDIR)/%.cpp,$(BUILDDIR)/%.o,$(SRC2))
 DEP := $(patsubst $(SRCDIR)/%.cpp,$(BUILDDIR)/%.d,$(SRC) $(SRC2))
 LIB = librwtools.a
+BIN = $(patsubst $(BUILDDIR)/%.o,%,$(OBJ2))
 CFLAGS = $(INC) -Wall -Wextra -g -O3 -pg
 LINK = $(LIB) 
 
 all: $(LIB) bins
 
 bins: $(LIB) $(OBJ2)
-	$(foreach bin,$(patsubst $(BUILDDIR)/%.o,%,$(OBJ2)),\
-  $(CXX) -o $(bin) $(BUILDDIR)/$(bin).o $(LINK);)
+	$(foreach bin,$(BIN),$(CXX) -o $(bin) $(BUILDDIR)/$(bin).o $(LINK);)
 
 $(LIB): $(OBJ)
 	ar scr $(LIB) $(OBJ)
@@ -27,6 +27,9 @@ $(BUILDDIR)/%.d: $(SRCDIR)/%.cpp
 	$(CXX) -MM -MT '$(patsubst $(SRCDIR)/%.cpp,$(BUILDDIR)/%.o,$<)' $(CFLAGS) $< > $@
 
 clean:
-	rm -f build/* $(patsubst $(BUILDDIR)/%.o,%,$(OBJ2)) $(LIB)
+	rm -f build/* $(LIB) $(BIN)
+
+install: $(BIN)
+	cp $(BIN) $(HOME)/bin
 
 -include $(DEP)

@@ -27,8 +27,8 @@ int main(int argc, char *argv[])
 	}
 	filename = argv[1];
 	ifstream dff(argv[1], ios::binary);
-	Clump clump;
-	clump.read(dff);
+	Clump *clump = new Clump;
+	clump->read(dff);
 	dff.close();
 
 	ofstream out(argv[2], ios::binary);
@@ -40,8 +40,8 @@ int main(int argc, char *argv[])
 	if (argc > curArg) {
 		arg = argv[curArg];
 		if (arg == "-c") {
-			for (uint32 i = 0; i < clump.geometryList.size(); i++)
-				clump.geometryList[i].cleanUp();
+			for (uint32 i = 0; i < clump->geometryList.size(); i++)
+				clump->geometryList[i].cleanUp();
 			curArg++;
 			cout << "cleaning up\n";
 		}
@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
 		cout << "writing version: " << hex << version << endl;
 	}
 
-	clump.write(out);
+	clump->write(out);
 	out.close();
 
 	bool detailed;
@@ -84,8 +84,10 @@ int main(int argc, char *argv[])
 			detailed = true;
 		else
 			return 0;
-		clump.dump(detailed);
+		clump->dump(detailed);
 	}
+
+	delete clump;
 
 	return 0;
 }

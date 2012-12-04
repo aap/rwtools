@@ -21,17 +21,17 @@ int main(int argc, char *argv[])
 	}
 	filename = argv[1];
 	ifstream rw(argv[1], ios::binary);
-	TextureDictionary txd;
-	txd.read(rw);
+	TextureDictionary *txd = new TextureDictionary;
+	txd->read(rw);
 	rw.close();
-	for (uint32 i = 0; i < txd.texList.size(); i++) {
-		if (txd.texList[i].platform == PLATFORM_PS2)
-			txd.texList[i].convertFromPS2();
-		if (txd.texList[i].platform == PLATFORM_XBOX)
-			txd.texList[i].convertFromXbox();
-		if (txd.texList[i].dxtCompression)
-			txd.texList[i].decompressDxt();
-		txd.texList[i].convertTo32Bit();
+	for (uint32 i = 0; i < txd->texList.size(); i++) {
+		if (txd->texList[i].platform == PLATFORM_PS2)
+			txd->texList[i].convertFromPS2();
+		if (txd->texList[i].platform == PLATFORM_XBOX)
+			txd->texList[i].convertFromXbox();
+		if (txd->texList[i].dxtCompression)
+			txd->texList[i].decompressDxt();
+		txd->texList[i].convertTo32Bit();
 	}
 
 	ofstream out(argv[2], ios::binary);
@@ -64,6 +64,7 @@ int main(int argc, char *argv[])
 		cout << "writing version: " << hex << version << endl;
 	}
 
-	txd.write(out);
+	txd->write(out);
 	out.close();
+	delete txd;
 }

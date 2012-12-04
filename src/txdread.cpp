@@ -297,8 +297,6 @@ void NativeTexture::readPs2(ifstream &rw)
 	uint32 unk2 = readUInt32(rw);
 	uint32 unk3 = readUInt32(rw);
 	uint32 unk4 = readUInt32(rw);
-//	rw.seekg(4*4, ios::cur);
-//	cout << hex << unk3;
 
 	rw.seekg(4*4, ios::cur);		// constant
 	uint32 dataSize = readUInt32(rw);	// texels + header
@@ -306,11 +304,10 @@ void NativeTexture::readPs2(ifstream &rw)
 	uint32 unk5 = readUInt32(rw);
 	rw.seekg(4, ios::cur);			// constant (sky mipmap val)
 
-	// 0x00000 means the texture is swizzled and has no headers
-	// 0x10000 means the texture is not swizzled and has no headers
+	// 0x00000 means the texture is not swizzled and has no headers
+	// 0x10000 means the texture is swizzled and has no headers
 	// 0x20000 means swizzling information is contained in the header
 	// the rest is the same as the generic raster format
-//	cout << hex << " " << rasterFormat << " " << depth;
 	bool hasHeader = (rasterFormat & 0x20000);
 
 /*
@@ -338,43 +335,38 @@ void NativeTexture::readPs2(ifstream &rw)
 	uint32 end = rw.tellg();
 	end += dataSize;
 	uint32 i = 0;
-	do {
+	while (rw.tellg() < end) {
 		// half dimensions if we have mipmaps
 		if (i > 0) {
 			width.push_back(width[i-1]/2);
 			height.push_back(height[i-1]/2);
 		}
+
 		if (hasHeader) {
 			rw.seekg(8*4, ios::cur); // constant
 			swizzleWidth.push_back(readUInt32(rw));
 			swizzleHeight.push_back(readUInt32(rw));
 			rw.seekg(6*4, ios::cur); // constant
-			rw.seekg(4, ios::cur); // mipmap size/0x10,
-			                       // (= width*height*depth/0x10)
+			// mipmap size/0x10, (= width*height*depth/0x10)
+			dataSize = readUInt32(rw) * 0x10;
 			rw.seekg(3*4, ios::cur); // constant
 		} else {
 			swizzleWidth.push_back(width[i]);
 			swizzleHeight.push_back(height[i]);
-		}
-		bool swizzled = (swizzleHeight[i] != height[i]);
-		if (rasterFormat & 0x10000) {
-			swizzled = true;
-			swizzleWidth[i] /= 2;
-			swizzleHeight[i] /= 2;
+			if (rasterFormat & 0x10000) {
+				swizzleWidth[i] /= 2;
+				swizzleHeight[i] /= 2;
+			}
+			dataSize = height[i]*height[i]*depth/8;
 		}
 
-		uint32 dataCalc = swizzleWidth[i]*swizzleHeight[i]*depth/8;
-		if (swizzled) // swizzling halves dimensions
-			dataCalc *= 4;
-		dataSizes.push_back(dataCalc);
-		texels.push_back(new uint8[dataCalc]);
+		dataSizes.push_back(dataSize);
+		texels.push_back(new uint8[dataSize]);
 		rw.read(reinterpret_cast <char *> (&texels[i][0]),
-		        dataCalc*sizeof(uint8));
+		        dataSize*sizeof(uint8));
 		i++;
-	} while (rw.tellg() < end);
+	}
 	mipmapCount = i;
-
-//	cout << " " << name << endl;
 
 	/* Palette */
 	// vc dyn_trash.txd is weird here
@@ -389,7 +381,6 @@ void NativeTexture::readPs2(ifstream &rw)
 			rw.seekg(6*4, ios::cur); // same in every txd
 			unkh4 = readUInt32(rw);
 			rw.seekg(3*4, ios::cur); // same in every txd
-//			rw.seekg(0x50, ios::cur);
 		}
 
 		paletteSize = (rasterFormat & RASTER_PAL8) ? 0x100 : 0x10;
@@ -454,46 +445,26 @@ void NativeTexture::convertFromPS2(void)
 	if (platform != PLATFORM_PS2)
 		return;
 
-//	hasAlpha = false;
 	for (uint32 j = 0; j < mipmapCount; j++) {
 		bool swizzled = (swizzleHeight[j] != height[j]);
 
 		// converts to 8bpp, palette stays 4bit
 		if (depth == 0x4) {
-			// perhaps unswizzle first
 			uint8 *oldtexels = texels[j];
-			dataSizes[j] = width[j]*height[j];
+			dataSizes[j] *= 2;
 			texels[j] = new uint8[dataSizes[j]];
-			for (uint32 i = 0; i < width[j]*height[j]/2; i++) {
+			for (uint32 i = 0; i < dataSizes[j]/2; i++) {
 				texels[j][i*2+0] = oldtexels[i] & 0x0F;
 				texels[j][i*2+1] = oldtexels[i] >> 4;
 			}
 			delete[] oldtexels;
-
-			if (swizzled) {
-				uint32 dataSize = swizzleWidth[j] *
-				                  swizzleHeight[j] * 4;
-				uint8 *newtexels = new uint8[dataSize];
-				unswizzle8(newtexels, texels[j],
-				           swizzleWidth[j]*2,
-					   swizzleHeight[j]*2);
-				delete[] texels[j];
-				texels[j] = newtexels;
-				dataSizes[j] = dataSize;
-			}
 			depth = 0x8;
+
+			if (swizzled)
+				processPs2Swizzle(j);
 		} else if (depth == 0x8) {
-			if (swizzled) {
-				uint32 dataSize = swizzleWidth[j] *
-				                  swizzleHeight[j] * 4;
-				uint8 *newtexels = new uint8[dataSize];
-				unswizzle8(newtexels, texels[j],
-				           swizzleWidth[j]*2,
-					   swizzleHeight[j]*2);
-				delete[] texels[j];
-				texels[j] = newtexels;
-				dataSizes[j] = dataSize;
-			}
+			if (swizzled)
+				processPs2Swizzle(j);
 			unclut(texels[j], width[j], height[j]);
 		} else if (depth == 0x20) {
 			for (uint32 i = 0; i < width[j]*height[j]; i++) {
@@ -516,19 +487,34 @@ void NativeTexture::convertFromPS2(void)
 			uint32 newalpha = palette[i*4+3] * 0xff;
 			newalpha /= 0x80;
 			palette[i*4+3] = newalpha;
-			// that sucks (and isn't really correct)
-//			if (palette[i*4+3] != 0xFF &&
-//			    palette[i*4+0] > 1 &&
-//			    palette[i*4+1] > 1 &&
-//			    palette[i*4+2] > 1)
-//				hasAlpha = true;
 		}
 	}
-//	if (maskName != "")
-//		hasAlpha = true;
 
 	platform = PLATFORM_D3D8;
 	dxtCompression = 0;
+}
+
+void NativeTexture::processPs2Swizzle(uint32 i)
+{
+	dataSizes[i] = swizzleWidth[i] *
+	                 swizzleHeight[i] * 4;
+	uint8 *newtexels = new uint8[dataSizes[i]];
+	unswizzle8(newtexels, texels[i],
+	           swizzleWidth[i]*2,
+	           swizzleHeight[i]*2);
+	delete[] texels[i];
+	texels[i] = newtexels;
+
+	uint32 stride = swizzleWidth[i]*2;
+	if (stride != width[i]) {
+		dataSizes[i] = width[i]*height[i];
+		newtexels = new uint8[dataSizes[i]];
+		for (uint32 y = 0; y < height[i]; y++)
+			for (uint32 x = 0; x < width[i]; x++)
+				newtexels[y*width[i]+x] = texels[i][y*stride+x];
+		delete[] texels[i];
+		texels[i] = newtexels;
+	}
 }
 
 void NativeTexture::decompressDxt4(void)
@@ -926,7 +912,8 @@ void unswizzle8(uint8 *texels, uint8 *rawIndices, uint32 width, uint32 height)
 			int32 ypos = (((y&(~3))>>1) + (y&1))&0x07;
 			int32 column_loc = ypos*width*2 + ((x+swap_sel)&0x07)*4;
 			int32 byte_sum = ((y>>1)&1) + ((x>>2)&2);
-			int swizzled = block_loc + column_loc + byte_sum;
+			uint32 swizzled = block_loc + column_loc + byte_sum;
+//			cout << swizzled << endl;
 			texels[y*width+x] = rawIndices[swizzled];
 		}
 }

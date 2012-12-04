@@ -525,6 +525,7 @@ struct NativeTexture
 	void writeTGA(void);
 
 	void convertFromPS2(void);
+	void processPs2Swizzle(uint32 mip);
 	void convertFromXbox(void);
 	void decompressDxt(void);
 	void decompressDxt1(void);
