@@ -12,6 +12,5 @@ TXD------------------------
 uncompressed xbox
 
 write ps2 format (5 unknowns left)
-ps2 small swizzled textures
 
 (write conversion functions)

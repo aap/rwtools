@@ -547,6 +547,7 @@ struct TextureDictionary
 	void read(std::ifstream &txd);
 	uint32 write(std::ofstream &txd);
 	void clear(void);
+	~TextureDictionary(void);
 };
 
 }

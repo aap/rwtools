@@ -1,7 +1,8 @@
-#include "renderware.h"
 #include <iostream>
 #include <fstream>
 #include <string>
+
+#include <renderware.h>
 using namespace std;
 using namespace rw;
 

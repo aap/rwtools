@@ -1,5 +1,8 @@
 SRCDIR = src
 BUILDDIR = build
+BINDIR = bin
+INCDIR = include
+LIBDIR = lib
 SRC := $(patsubst %.cpp,$(SRCDIR)/%.cpp,dffread.cpp dffwrite.cpp\
   ps2native.cpp xboxnative.cpp txdread.cpp txdwrite.cpp renderware.cpp)
 SRC2 := $(patsubst %.cpp,$(SRCDIR)/%.cpp,\
@@ -7,15 +10,15 @@ SRC2 := $(patsubst %.cpp,$(SRCDIR)/%.cpp,\
 OBJ := $(patsubst $(SRCDIR)/%.cpp,$(BUILDDIR)/%.o,$(SRC))
 OBJ2 := $(patsubst $(SRCDIR)/%.cpp,$(BUILDDIR)/%.o,$(SRC2))
 DEP := $(patsubst $(SRCDIR)/%.cpp,$(BUILDDIR)/%.d,$(SRC) $(SRC2))
-LIB = librwtools.a
+LIB = $(LIBDIR)/librwtools.a
 BIN = $(patsubst $(BUILDDIR)/%.o,%,$(OBJ2))
-CFLAGS = $(INC) -Wall -Wextra -g -O3 -pg
+CFLAGS = -I$(INCDIR) -Wall -Wextra -g -O3 -pg
 LINK = $(LIB) 
 
 all: $(LIB) bins
 
 bins: $(LIB) $(OBJ2)
-	$(foreach bin,$(BIN),$(CXX) -o $(bin) $(BUILDDIR)/$(bin).o $(LINK);)
+	$(foreach bin,$(BIN),$(CXX) -o $(BINDIR)/$(bin) $(BUILDDIR)/$(bin).o $(LINK);)
 
 $(LIB): $(OBJ)
 	ar scr $(LIB) $(OBJ)
@@ -27,9 +30,9 @@ $(BUILDDIR)/%.d: $(SRCDIR)/%.cpp
 	$(CXX) -MM -MT '$(patsubst $(SRCDIR)/%.cpp,$(BUILDDIR)/%.o,$<)' $(CFLAGS) $< > $@
 
 clean:
-	rm -f build/* $(LIB) $(BIN)
+	rm -f build/* lib/* bin/*
 
-install: $(BIN)
-	cp $(BIN) $(HOME)/bin
+install: $(patsubst %,$(BINDIR)/%,$(BIN))
+	cp $(patsubst %,$(BINDIR)/%,$(BIN)) $(HOME)/bin
 
 -include $(DEP)

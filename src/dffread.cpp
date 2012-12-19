@@ -1,5 +1,6 @@
 #include <cmath>
-#include "renderware.h"
+
+#include <renderware.h>
 using namespace std;
 
 namespace rw {
@@ -210,11 +211,11 @@ void Atomic::dump(uint32 index, string ind)
 }
 
 Atomic::Atomic(void)
+: frameIndex(-1), geometryIndex(-1), hasRightToRender(false),
+  rightToRenderVal1(0), rightToRenderVal2(0), hasParticles(false),
+  particlesVal(0), hasPipelineSet(false), pipelineSetVal(0),
+  hasMaterialFx(false), materialFxVal(0)
 {
-	hasRightToRender = false;
-	hasParticles = false;
-	hasMaterialFx = false;
-	hasPipelineSet = false;
 }
 
 /*
@@ -298,9 +299,14 @@ void Frame::dump(uint32 index, string ind)
 }
 
 Frame::Frame(void)
+: parent(-1), name(""), hasHAnim(false), hAnimUnknown1(0), hAnimBoneId(-1),
+  hAnimBoneCount(0), hAnimUnknown2(0), hAnimUnknown3(0)
 {
-	hasHAnim = false;
-	hAnimBoneCount = 0;
+	for (int i = 0; i < 3; i++) {
+		position[i] = 0.0f;
+		for (int j = 0; j < 3; j++)
+			rotationMatrix[i*3+j] = (i == j) ? 1.0f : 0.0f;
+	}
 }
 
 /*
@@ -870,12 +876,12 @@ void Geometry::dump(uint32 index, string ind, bool detailed)
 }
 
 Geometry::Geometry(void)
+: flags(0), numUVs(0), hasNativeGeometry(false), vertexCount(0),
+  hasNormals(false), faceType(0), numIndices(0), hasSkin(false), boneCount(0),
+  specialIndexCount(0), unknown1(0), unknown2(0), hasMeshExtension(false),
+  meshExtension(0), hasNightColors(false), nightColorsUnknown(0),
+  hasMorph(false)
 {
-	hasMorph = false;
-	hasMeshExtension = false;
-	meshExtension = 0;
-	hasSkin = false;
-	hasNightColors = false;
 }
 
 Geometry::Geometry(const Geometry &orig)
@@ -1129,12 +1135,17 @@ void Material::dump(uint32 index, string ind)
 }
 
 Material::Material(void)
+: flags(0), unknown(0), hasTex(false), hasRightToRender(false),
+  rightToRenderVal1(0), rightToRenderVal2(0), hasMatFx(false), matFx(0),
+  hasReflectionMat(false), reflectionIntensity(0.0f), hasSpecularMat(false),
+  specularLevel(0.0f)
 {
-	hasMatFx = false;
-	matFx = 0;
-	hasRightToRender = false;
-	hasReflectionMat = false;
-	hasSpecularMat = false;
+	for (int i = 0; i < 4; i++)
+		color[i] = 0;
+	for (int i = 0; i < 3; i++) {
+		surfaceProps[i] = 0.0f;
+		reflectionChannelAmount[i] = 0.0f;
+	}
 }
 
 Material::Material(const Material& orig)
@@ -1204,10 +1215,8 @@ Material::~Material(void)
 
 
 MatFx::MatFx(void)
+: hasTex1(false), hasTex2(false), hasDualPassMap(false)
 {
-	hasTex1 = false;
-	hasTex2 = false;
-	hasDualPassMap = false;
 }
 
 
@@ -1278,6 +1287,9 @@ void Texture::dump(std::string ind)
 	cout << ind << "}\n";
 }
 
-Texture::Texture(void) { hasSkyMipmap = false; }
+Texture::Texture(void)
+: filterFlags(0), name(""), maskName(""), hasSkyMipmap(false)
+{
+}
 
 }

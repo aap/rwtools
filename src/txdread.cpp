@@ -1,12 +1,14 @@
 #include <cstring>
 #include <cstdlib>
-#include "renderware.h"
+
+#include <renderware.h>
 using namespace std;
 
 namespace rw {
 
-void unclut(uint8 *texels, uint32 width, uint32 height);
-void unswizzle8(uint8 *texels, uint8 *rawIndices, uint32 width, uint32 height);
+static void unclut(uint8 *texels, uint32 width, uint32 height);
+static void unswizzle8(uint8 *texels, uint8 *rawIndices,
+                       uint32 width, uint32 height);
 
 /*
  * Texture Dictionary
@@ -60,7 +62,12 @@ void TextureDictionary::read(ifstream &rw)
 
 void TextureDictionary::clear(void)
 {
-	texList.resize(0);
+	texList.clear();
+}
+
+TextureDictionary::~TextureDictionary(void)
+{
+	texList.clear();
 }
 
 /*
@@ -89,6 +96,7 @@ void NativeTexture::readD3d(ifstream &rw)
 	maskName = buffer;
 
 	rasterFormat = readUInt32(rw);
+//	cout << hex << rasterFormat << endl;
 
 	hasAlpha = false;
 	char fourcc[5];
@@ -424,11 +432,45 @@ void NativeTexture::convertTo32Bit(void)
 			uint8 *newtexels = new uint8[dataSize];
 			for (uint32 i = 0; i < width[j]*height[j]; i++) {
 				uint32 col = *((uint16 *) &texels[j][i*2]);
-				// swap r and b
 				newtexels[i*4+0] =((col&0x001F)>>0x0)*0xFF/0x1F;
 				newtexels[i*4+1] =((col&0x03E0)>>0x5)*0xFF/0x1F;
 				newtexels[i*4+2] =((col&0x7C00)>>0xa)*0xFF/0x1F;
 				newtexels[i*4+3] =((col&0x8000)>>0xf)*0xFF;
+			}
+			delete[] texels[j];
+			texels[j] = newtexels;
+			dataSizes[j] = dataSize;
+		}
+		rasterFormat = RASTER_8888;
+		depth = 0x20;
+	} else if ((rasterFormat & RASTER_MASK) ==  RASTER_565) {
+		for (uint32 j = 0; j < mipmapCount; j++) {
+			uint32 dataSize = width[j]*height[j]*4;
+			uint8 *newtexels = new uint8[dataSize];
+			for (uint32 i = 0; i < width[j]*height[j]; i++) {
+				uint32 col = *((uint16 *) &texels[j][i*2]);
+				newtexels[i*4+0] =((col&0x001F)>>0x0)*0xFF/0x1F;
+				newtexels[i*4+1] =((col&0x07E0)>>0x5)*0xFF/0x3F;
+				newtexels[i*4+2] =((col&0xF800)>>0xb)*0xFF/0x1F;
+				newtexels[i*4+3] = 255;
+			}
+			delete[] texels[j];
+			texels[j] = newtexels;
+			dataSizes[j] = dataSize;
+		}
+		rasterFormat = RASTER_888;
+		depth = 0x20;
+	} else if ((rasterFormat & RASTER_MASK) ==  RASTER_4444) {
+		for (uint32 j = 0; j < mipmapCount; j++) {
+			uint32 dataSize = width[j]*height[j]*4;
+			uint8 *newtexels = new uint8[dataSize];
+			for (uint32 i = 0; i < width[j]*height[j]; i++) {
+				uint32 col = *((uint16 *) &texels[j][i*2]);
+				// swap r and b
+				newtexels[i*4+0] =((col&0x000F)>>0x0)*0xFF/0xF;
+				newtexels[i*4+1] =((col&0x00F0)>>0x4)*0xFF/0xF;
+				newtexels[i*4+2] =((col&0x0F00)>>0x8)*0xFF/0xF;
+				newtexels[i*4+3] =((col&0xF000)>>0xc)*0xFF/0xF;
 			}
 			delete[] texels[j];
 			texels[j] = newtexels;
@@ -804,8 +846,10 @@ void NativeTexture::writeTGA(void)
 }
 
 NativeTexture::NativeTexture(void)
+: platform(0), name(""), maskName(""), filterFlags(0), rasterFormat(0),
+  depth(0), palette(0), paletteSize(0), hasAlpha(false), mipmapCount(0),
+  dxtCompression(0)
 {
-	palette = 0;
 }
 
 NativeTexture::NativeTexture(const NativeTexture &orig)
@@ -895,7 +939,7 @@ NativeTexture::~NativeTexture(void)
 
 
 /* convert from CLUT format used by the ps2 */
-void unclut(uint8 *texels, uint32 width, uint32 height)
+static void unclut(uint8 *texels, uint32 width, uint32 height)
 {
 	uint8 map[4] = { 0, 16, 8, 24 };
 	for (uint32 i = 0; i < width*height; i++)
@@ -903,7 +947,8 @@ void unclut(uint8 *texels, uint32 width, uint32 height)
 }
 
 /* taken from the ps2 linux website */
-void unswizzle8(uint8 *texels, uint8 *rawIndices, uint32 width, uint32 height)
+static void unswizzle8(uint8 *texels, uint8 *rawIndices,
+                       uint32 width, uint32 height)
 {
 	for (uint32 y = 0; y < height; y++)
 		for (uint32 x = 0; x < width; x++) {

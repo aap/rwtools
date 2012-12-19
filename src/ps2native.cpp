@@ -1,7 +1,6 @@
-#include "renderware.h"
-
 #include <cstdio>
 
+#include <renderware.h>
 using namespace std;
 
 namespace rw {
