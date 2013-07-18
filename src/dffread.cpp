@@ -863,6 +863,22 @@ void Geometry::dump(uint32 index, string ind, bool detailed)
 		cout << ind << "}\n";
 	}
 
+	cout << endl << ind << "BinMesh {\n";
+	ind += "  ";
+	cout << ind << "faceType: " << faceType << endl;
+	cout << ind << "numIndices: " << numIndices << endl;
+	for (uint32 i = 0; i < splits.size(); i++) {
+		cout << endl << ind << "Split " << i << " {\n";
+		ind += "  ";
+		cout << ind << "matIndex: " << splits[i].matIndex << endl;
+		cout << ind << "numIndices: "<<splits[i].indices.size() << endl;
+		ind = ind.substr(0, ind.size()-2);
+		cout << ind << "}\n";
+	}
+	ind = ind.substr(0, ind.size()-2);
+	cout << ind << "}\n";
+
+
 	cout << endl << ind << "MaterialList {\n";
 	ind += "  ";
 	cout << ind << "numMaterials: " << materialList.size() << endl;

@@ -3,7 +3,8 @@ using namespace std;
 
 using namespace rw;
 
-int main(int argc, char *argv[])
+int
+main(int argc, char *argv[])
 {
 	if (sizeof(uint32) != 4 || sizeof(int32) != 4 ||
 	    sizeof(uint16) != 2 || sizeof(int16) != 2 ||
@@ -21,6 +22,10 @@ int main(int argc, char *argv[])
 	txd.read(rw);
 	rw.close();
 	for (uint32 i = 0; i < txd.texList.size(); i++) {
+		NativeTexture &t = txd.texList[i];
+		cout << i << " " << t.name << " " << t.maskName << " "
+			<< " " << t.width[0] << " " << t.height[0] << " "
+			<< " " << t.depth << " " << hex << t.rasterFormat << endl;
 		if (txd.texList[i].platform == PLATFORM_PS2)
 			txd.texList[i].convertFromPS2();
 		if (txd.texList[i].platform == PLATFORM_XBOX)

@@ -50,6 +50,7 @@ void Geometry::readPs2NativeData(ifstream &rw)
 
 	index = 0;
 	vector<uint32> typesRead;
+	numIndices = 0;
 	for (uint32 i = 0; i < splits.size(); i++) {
 		uint32 splitSize = readUInt32(rw);
 		rw.seekg(4, ios::cur);	// bool: hasNoSectionAData
@@ -141,6 +142,7 @@ void Geometry::readPs2NativeData(ifstream &rw)
 				}
 			}
 		}
+		this->numIndices += splits[i].indices.size();
 	}
 }
 
