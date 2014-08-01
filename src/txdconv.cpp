@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
 				cout << "unknown version\n";
 		}
 		if (arg == "-V") {
-			sscanf(argv[curArg+1], "%lx", &version);
+			sscanf(argv[curArg+1], "%x", &version);
 			curArg += 2;
 		}
 		cout << "writing version: " << hex << version << endl;

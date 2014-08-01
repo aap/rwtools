@@ -4,7 +4,8 @@ BINDIR = bin
 INCDIR = include
 LIBDIR = lib
 SRC := $(patsubst %.cpp,$(SRCDIR)/%.cpp,dffread.cpp dffwrite.cpp\
-  ps2native.cpp xboxnative.cpp txdread.cpp txdwrite.cpp renderware.cpp)
+  ps2native.cpp xboxnative.cpp oglnative.cpp\
+  txdread.cpp txdwrite.cpp renderware.cpp)
 SRC2 := $(patsubst %.cpp,$(SRCDIR)/%.cpp,\
   dffconv.cpp txdconv.cpp txdex.cpp dumprwtree.cpp)
 OBJ := $(patsubst $(SRCDIR)/%.cpp,$(BUILDDIR)/%.o,$(SRC))
@@ -12,7 +13,7 @@ OBJ2 := $(patsubst $(SRCDIR)/%.cpp,$(BUILDDIR)/%.o,$(SRC2))
 DEP := $(patsubst $(SRCDIR)/%.cpp,$(BUILDDIR)/%.d,$(SRC) $(SRC2))
 LIB = $(LIBDIR)/librwtools.a
 BIN = $(patsubst $(BUILDDIR)/%.o,%,$(OBJ2))
-CFLAGS = -I$(INCDIR) -Wall -Wextra -g -O3 -pg
+CFLAGS = -I$(INCDIR) -Wall -Wextra -g -O3 -pg -DDEBUG
 LINK = $(LIB) 
 
 all: $(LIB) bins

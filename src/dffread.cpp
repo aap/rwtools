@@ -26,12 +26,10 @@ void Clump::read(ifstream& rw)
 
 	READ_HEADER(CHUNK_STRUCT);
 	uint32 numAtomics = readUInt32(rw);
-	uint32 numLights;
+	uint32 numLights = 0;
 	if (header.length == 0xC) {
 		numLights = readUInt32(rw);
 		rw.seekg(4, ios::cur); /* camera count, unused in gta */
-	} else {
-		numLights = 0;
 	}
 	atomicList.resize(numAtomics);
 
@@ -264,7 +262,10 @@ void Frame::readExtension(ifstream &rw)
 			for (uint32 i = 0; i < hAnimBoneCount; i++) {
 				hAnimBoneIds.push_back(readInt32(rw));
 				hAnimBoneNumbers.push_back(readUInt32(rw));
-				hAnimBoneTypes.push_back(readUInt32(rw));
+				uint32 flag = readUInt32(rw);
+				if((flag&~0x3) != 0)
+					cout << flag << endl;
+				hAnimBoneTypes.push_back(flag);
 			}
 			break;
 		default:
@@ -272,6 +273,8 @@ void Frame::readExtension(ifstream &rw)
 			break;
 		}
 	}
+//	if(hasHAnim)
+//		cout << hAnimBoneId << " " << name << endl;
 }
 
 void Frame::dump(uint32 index, string ind)
@@ -389,7 +392,8 @@ void Geometry::read(ifstream &rw)
 	readExtension(rw);
 }
 
-void Geometry::readExtension(ifstream &rw)
+void
+Geometry::readExtension(ifstream &rw)
 {
 	HeaderInfo header;
 
@@ -398,35 +402,51 @@ void Geometry::readExtension(ifstream &rw)
 	streampos end = rw.tellg();
 	end += header.length;
 
-	while (rw.tellg() < end) {
+	while(rw.tellg() < end){
 		header.read(rw);
-		switch (header.type) {
+		switch(header.type){
 		case CHUNK_BINMESH: {
 			faceType = readUInt32(rw);
 			uint32 numSplits = readUInt32(rw);
 			numIndices = readUInt32(rw);
 			splits.resize(numSplits);
-			for (uint32 i = 0; i < numSplits; i++) {
+			bool hasData = header.length > 12+numSplits*8;
+			for(uint32 i = 0; i < numSplits; i++){
 				uint32 numIndices = readUInt32(rw);
 				splits[i].matIndex = readUInt32(rw);
 				splits[i].indices.resize(numIndices);
-				if (!hasNativeGeometry)
-					for (uint32 j = 0; j < numIndices; j++)
+				if(hasData){
+					/* OpenGL Data */
+					if(hasNativeGeometry)
+					for(uint32 j = 0; j < numIndices; j++)
 						splits[i].indices[j] = 
-					          readUInt32(rw);
+						  readUInt16(rw);
+					else
+					for(uint32 j = 0; j < numIndices; j++)
+						splits[i].indices[j] = 
+						  readUInt32(rw);
+				}
 			}
 			break;
 		} case CHUNK_NATIVEDATA: {
 			streampos beg = rw.tellg();
-			rw.seekg(0x0c, ios::cur);
-			uint32 platform = readUInt32(rw);
-			rw.seekg(beg, ios::beg);
-			if (platform == PLATFORM_PS2)
-				readPs2NativeData(rw);
-			else if (platform == PLATFORM_XBOX)
-				readXboxNativeData(rw);
-			else
-				cout << "unknown platform " << platform << endl;
+			uint32 size = header.length;
+			uint32 ver = header.version;
+			header.read(rw);
+			if(header.version==ver && header.type==CHUNK_STRUCT){
+				uint32 platform = readUInt32(rw);
+				rw.seekg(beg, ios::beg);
+				if(platform == PLATFORM_PS2)
+					readPs2NativeData(rw);
+				else if(platform == PLATFORM_XBOX)
+					readXboxNativeData(rw);
+				else
+					cout << "unknown platform " <<
+					        platform << endl;
+			}else{
+				rw.seekg(beg, ios::beg);
+				readOglNativeData(rw, size);
+			}
 			break;
 		}
 		case CHUNK_MESHEXTENSION: {
@@ -438,12 +458,12 @@ void Geometry::readExtension(ifstream &rw)
 		} case CHUNK_NIGHTVERTEXCOLOR: {
 			hasNightColors = true;
 			nightColorsUnknown = readUInt32(rw);
-			if (nightColors.size() != 0) {
+			if(nightColors.size() != 0){
 				// native data also has them, so skip
 				rw.seekg(header.length - sizeof(uint32),
 				          ios::cur);
-			} else {
-				if (nightColorsUnknown != 0) {
+			}else{
+				if(nightColorsUnknown != 0){
 				/* TODO: could be better */
 					nightColors.resize(header.length-4);
 					rw.read((char *)
@@ -457,24 +477,25 @@ void Geometry::readExtension(ifstream &rw)
 			readUInt32(rw);
 			break;
 		} case CHUNK_SKIN: {
-			if (hasNativeGeometry) {
+			if(hasNativeGeometry){
 				streampos beg = rw.tellg();
 				rw.seekg(0x0c, ios::cur);
 				uint32 platform = readUInt32(rw);
 				rw.seekg(beg, ios::beg);
 //				streampos end = beg+header.length;
-				if (platform == PLATFORM_PS2) {
+				if(platform == PLATFORM_OGL ||
+				   platform == PLATFORM_PS2){
 					hasSkin = true;
-					readPs2NativeSkin(rw);
-				} else if (platform == PLATFORM_XBOX) {
+					readNativeSkinMatrices(rw);
+				}else if(platform == PLATFORM_XBOX){
 					hasSkin = true;
 					readXboxNativeSkin(rw);
-				} else {
+				}else{
 					cout << "skin: unknown platform "
 					     << platform << endl;
 					rw.seekg(header.length, ios::cur);
 				}
-			} else {
+			}else{
 				hasSkin = true;
 				boneCount = readUInt8(rw);
 				specialIndexCount = readUInt8(rw);
@@ -494,7 +515,7 @@ void Geometry::readExtension(ifstream &rw)
 					 vertexCount*4*sizeof(float32));
 
 				inverseMatrices.resize(boneCount*16);
-				for (uint32 i = 0; i < boneCount; i++) {
+				for(uint32 i = 0; i < boneCount; i++){
 					// skip 0xdeaddead
 					if (specialIndexCount == 0)
 						rw.seekg(4, ios::cur);
@@ -503,7 +524,7 @@ void Geometry::readExtension(ifstream &rw)
 						 0x10*sizeof(float32));
 				}
 				// skip some zeroes
-				if (specialIndexCount != 0)
+				if(specialIndexCount != 0)
 					rw.seekg(0x0C, ios::cur);
 			}
 			break;
@@ -520,6 +541,37 @@ void Geometry::readExtension(ifstream &rw)
 			break;
 		}
 	}
+}
+
+void Geometry::readNativeSkinMatrices(ifstream &rw)
+{
+	HeaderInfo header;
+
+	READ_HEADER(CHUNK_STRUCT);
+
+	uint32 platform = readUInt32(rw);
+	if (platform != PLATFORM_PS2 && platform != PLATFORM_OGL) {
+		cerr << "error: native skin not in ps2 or ogl format\n";
+		return;
+	}
+
+	boneCount = readUInt8(rw);
+	specialIndexCount = readUInt8(rw);
+	unknown1 = readUInt8(rw);
+	unknown2 = readUInt8(rw);
+
+	specialIndices.resize(specialIndexCount);
+	rw.read((char *) (&specialIndices[0]),
+			specialIndexCount*sizeof(uint8));
+
+	inverseMatrices.resize(boneCount*0x10);
+	for (uint32 i = 0; i < boneCount; i++)
+		rw.read((char *) (&inverseMatrices[i*0x10]),
+		        0x10*sizeof(float32));
+
+	// skip unknowns
+	if (specialIndexCount != 0)
+		rw.seekg(0x1C, ios::cur);
 }
 
 void Geometry::readMeshExtension(ifstream &rw)

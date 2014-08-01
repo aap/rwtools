@@ -39,10 +39,11 @@ extern uint32 version;
 
 enum PLATFORM_ID
 {
-	PLATFORM_PS2 = 4,
-	PLATFORM_XBOX = 5,
-	PLATFORM_D3D8 = 8,
-	PLATFORM_D3D9 = 9,
+	PLATFORM_OGL = 2,
+	PLATFORM_PS2    = 4,
+	PLATFORM_XBOX   = 5,
+	PLATFORM_D3D8   = 8,
+	PLATFORM_D3D9   = 9,
 	PLATFORM_PS2FOURCC = 0x00325350 /* "PS2\0" */
 };
 typedef enum PLATFORM_ID PLATFORM_ID;
@@ -167,10 +168,10 @@ std::string getChunkName(uint32 i);
  * DFFs
  */
 
-#define NORMALSCALE (1.0/128.0)
-#define	VERTSCALE1 (1.0/128.0)	/* normally used */
-#define	VERTSCALE2 (1.0/1024.0)	/* used by objects with normals */
-#define	UVSCALE (1.0/4096.0)
+//#define NORMALSCALE (1.0/128.0)
+//#define	VERTSCALE1 (1.0/128.0)	/* normally used */
+//#define	VERTSCALE2 (1.0/1024.0)	/* used by objects with normals */
+//#define	UVSCALE (1.0/4096.0)
 
 enum { 
         FLAGS_TRISTRIP   = 0x01, 
@@ -179,7 +180,7 @@ enum {
         FLAGS_PRELIT     = 0x08, 
         FLAGS_NORMALS    = 0x10, 
         FLAGS_LIGHT      = 0x20, 
-        FLAGS_MODULATEMATERIALCOLOR  = 0x40, 
+			FLAGS_MODULATEMATERIALCOLOR  = 0x40, 
         FLAGS_TEXTURED2  = 0x80
 };
 
@@ -457,9 +458,10 @@ struct Geometry
 	~Geometry(void);
 private:
 	void readPs2NativeData(std::ifstream &dff);
-	void readPs2NativeSkin(std::ifstream &dff);
 	void readXboxNativeData(std::ifstream &dff);
 	void readXboxNativeSkin(std::ifstream &dff);
+	void readOglNativeData(std::ifstream &dff, int size);
+	void readNativeSkinMatrices(std::ifstream &dff);
 	bool isDegenerateFace(uint32 i, uint32 j, uint32 k);
 	void generateFaces(void);
 	void deleteOverlapping(std::vector<uint32> &typesRead, uint32 split);

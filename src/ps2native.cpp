@@ -5,37 +5,12 @@ using namespace std;
 
 namespace rw {
 
-uint32 index;
+#define NORMALSCALE (1.0/128.0)
+#define	VERTSCALE1 (1.0/128.0)	/* normally used */
+#define	VERTSCALE2 (1.0/1024.0)	/* used by objects with normals */
+#define	UVSCALE (1.0/4096.0)
 
-void Geometry::readPs2NativeSkin(ifstream &rw)
-{
-	HeaderInfo header;
-
-	READ_HEADER(CHUNK_STRUCT);
-
-	if (readUInt32(rw) != PLATFORM_PS2) {
-		cerr << "error: native data not in ps2 format\n";
-		return;
-	}
-
-	boneCount = readUInt8(rw);
-	specialIndexCount = readUInt8(rw);
-	unknown1 = readUInt8(rw);
-	unknown2 = readUInt8(rw);
-
-	specialIndices.resize(specialIndexCount);
-	rw.read((char *) (&specialIndices[0]),
-			specialIndexCount*sizeof(uint8));
-
-	inverseMatrices.resize(boneCount*0x10);
-	for (uint32 i = 0; i < boneCount; i++)
-		rw.read((char *) (&inverseMatrices[i*0x10]),
-		        0x10*sizeof(float32));
-
-	// skip unknowns
-	if (specialIndexCount != 0)
-		rw.seekg(0x1C, ios::cur);
-}
+static uint32 index;
 
 void Geometry::readPs2NativeData(ifstream &rw)
 {
@@ -150,10 +125,7 @@ void Geometry::readPs2NativeData(ifstream &rw)
 void Geometry::readData(uint32 vertexCount, uint32 type,
                         uint32 split, ifstream &rw)
 {
-	float32 vertexScale = (flags & FLAGS_NORMALS) ? VERTSCALE2 : VERTSCALE1;
-	// perhaps this is the only condition?
-	if (flags & FLAGS_PRELIT)
-		vertexScale = VERTSCALE1;
+	float32 vertexScale = (flags & FLAGS_PRELIT) ? VERTSCALE1 : VERTSCALE2;
 
 	uint32 size;
 	type &= 0xFF00FFFF;
