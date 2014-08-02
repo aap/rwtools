@@ -11,7 +11,7 @@ char *filename;
  * Clump
  */
 
-void Clump::read(ifstream& rw)
+void Clump::read(istream& rw)
 {
 	HeaderInfo header;
 
@@ -66,7 +66,7 @@ void Clump::read(ifstream& rw)
 	readExtension(rw);
 }
 
-void Clump::readExtension(ifstream &rw)
+void Clump::readExtension(istream &rw)
 {
 	HeaderInfo header;
 
@@ -130,7 +130,7 @@ void Clump::clear(void)
  * Atomic
  */
 
-void Atomic::read(ifstream &rw)
+void Atomic::read(istream &rw)
 {
 	HeaderInfo header;
 
@@ -144,7 +144,7 @@ void Atomic::read(ifstream &rw)
 	readExtension(rw);
 }
 
-void Atomic::readExtension(ifstream &rw)
+void Atomic::readExtension(istream &rw)
 {
 	HeaderInfo header;
 
@@ -221,7 +221,7 @@ Atomic::Atomic(void)
  */
 
 // only reads part of the frame struct
-void Frame::readStruct(ifstream &rw)
+void Frame::readStruct(istream &rw)
 {
 	rw.read((char *) rotationMatrix, 9*sizeof(float32));
 	rw.read((char *) position, 3*sizeof(float32));
@@ -229,7 +229,7 @@ void Frame::readStruct(ifstream &rw)
 	rw.seekg(4, ios::cur);	// matrix creation flag, unused
 }
 
-void Frame::readExtension(ifstream &rw)
+void Frame::readExtension(istream &rw)
 {
 	HeaderInfo header;
 
@@ -316,7 +316,7 @@ Frame::Frame(void)
  * Geometry
  */
 
-void Geometry::read(ifstream &rw)
+void Geometry::read(istream &rw)
 {
 	HeaderInfo header;
 
@@ -393,7 +393,7 @@ void Geometry::read(ifstream &rw)
 }
 
 void
-Geometry::readExtension(ifstream &rw)
+Geometry::readExtension(istream &rw)
 {
 	HeaderInfo header;
 
@@ -543,7 +543,7 @@ Geometry::readExtension(ifstream &rw)
 	}
 }
 
-void Geometry::readNativeSkinMatrices(ifstream &rw)
+void Geometry::readNativeSkinMatrices(istream &rw)
 {
 	HeaderInfo header;
 
@@ -574,7 +574,7 @@ void Geometry::readNativeSkinMatrices(ifstream &rw)
 		rw.seekg(0x1C, ios::cur);
 }
 
-void Geometry::readMeshExtension(ifstream &rw)
+void Geometry::readMeshExtension(istream &rw)
 {
 	if (meshExtension->unknown == 0)
 		return;
@@ -1042,7 +1042,7 @@ Geometry::~Geometry(void)
  * Material
  */
 
-void Material::read(ifstream &rw)
+void Material::read(istream &rw)
 {
 	HeaderInfo header;
 
@@ -1061,7 +1061,7 @@ void Material::read(ifstream &rw)
 	readExtension(rw);
 }
 
-void Material::readExtension(ifstream &rw)
+void Material::readExtension(istream &rw)
 {
 	HeaderInfo header;
 
@@ -1292,7 +1292,7 @@ MatFx::MatFx(void)
  * Texture
  */
 
-void Texture::read(ifstream &rw)
+void Texture::read(istream &rw)
 {
 	HeaderInfo header;
 
@@ -1319,7 +1319,7 @@ void Texture::read(ifstream &rw)
 	readExtension(rw);
 }
 
-void Texture::readExtension(ifstream &rw)
+void Texture::readExtension(istream &rw)
 {
 	HeaderInfo header;
 

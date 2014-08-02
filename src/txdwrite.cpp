@@ -21,7 +21,7 @@ namespace rw {
 	writtenBytesReturn = bytesWritten;\
 	rw.seekp(oldPos, ios::beg);
 
-uint32 TextureDictionary::write(ofstream &rw)
+uint32 TextureDictionary::write(ostream &rw)
 {
 	HeaderInfo header;
 	header.version = version;
@@ -67,7 +67,7 @@ uint32 TextureDictionary::write(ofstream &rw)
 	return bytesWritten;
 }
 
-uint32 NativeTexture::writeD3d(ofstream &rw)
+uint32 NativeTexture::writeD3d(ostream &rw)
 {
 	HeaderInfo header;
 	header.version = version;

@@ -26,7 +26,7 @@ uint32 version;
  * Clump
  */
 
-uint32 Clump::write(ofstream &rw)
+uint32 Clump::write(ostream &rw)
 {
 	HeaderInfo header;
 	header.version = version;
@@ -115,7 +115,7 @@ uint32 Clump::write(ofstream &rw)
  * Atomic
  */
 
-uint32 Atomic::write(ofstream &rw)
+uint32 Atomic::write(ostream &rw)
 {
 	HeaderInfo header;
 	header.version = version;
@@ -190,7 +190,7 @@ uint32 Atomic::write(ofstream &rw)
  */
 
 // only writes part of the frame struct
-uint32 Frame::writeStruct(ofstream &rw)
+uint32 Frame::writeStruct(ostream &rw)
 {
 	uint32 bytesWritten = 0;
 	rw.write((char *) (rotationMatrix), 9*sizeof(float32));
@@ -203,7 +203,7 @@ uint32 Frame::writeStruct(ofstream &rw)
 	return bytesWritten;
 }
 
-uint32 Frame::writeExtension(ofstream &rw)
+uint32 Frame::writeExtension(ostream &rw)
 {
 	HeaderInfo header;
 	header.version = version;
@@ -250,7 +250,7 @@ uint32 Frame::writeExtension(ofstream &rw)
  * Geometry
  */
 
-uint32 Geometry::write(ofstream &rw)
+uint32 Geometry::write(ostream &rw)
 {
 	HeaderInfo header;
 	header.version = version;
@@ -455,7 +455,7 @@ uint32 Geometry::write(ofstream &rw)
 	return bytesWritten;
 }
 
-uint32 Geometry::writeMeshExtension(ofstream &rw)
+uint32 Geometry::writeMeshExtension(ostream &rw)
 {
 	HeaderInfo header;
 	header.version = version;
@@ -528,7 +528,7 @@ uint32 Geometry::writeMeshExtension(ofstream &rw)
  * Material
  */
 
-uint32 Material::write(ofstream &rw)
+uint32 Material::write(ostream &rw)
 {
 	HeaderInfo header;
 	header.version = version;
@@ -707,7 +707,7 @@ uint32 Material::write(ofstream &rw)
  * Texture
  */
 
-uint32 Texture::write(ofstream &rw)
+uint32 Texture::write(ostream &rw)
 {
 	HeaderInfo header;
 	header.version = version;

@@ -1,7 +1,8 @@
 #include <cstring>
 #include <cstdlib>
-
+#include <fstream>
 #include <renderware.h>
+
 using namespace std;
 
 namespace rw {
@@ -14,7 +15,7 @@ static void unswizzle8(uint8 *texels, uint8 *rawIndices,
  * Texture Dictionary
  */
 
-void TextureDictionary::read(ifstream &rw)
+void TextureDictionary::read(istream &rw)
 {
 	HeaderInfo header;
 
@@ -74,7 +75,7 @@ TextureDictionary::~TextureDictionary(void)
  * Native Texture
  */
 
-void NativeTexture::readD3d(ifstream &rw)
+void NativeTexture::readD3d(istream &rw)
 {
 	HeaderInfo header;
 
@@ -157,7 +158,7 @@ void NativeTexture::readD3d(ifstream &rw)
 	}
 }
 
-void NativeTexture::readXbox(ifstream &rw)
+void NativeTexture::readXbox(istream &rw)
 {
 	HeaderInfo header;
 
@@ -267,7 +268,7 @@ void NativeTexture::convertFromXbox(void)
 	platform = PLATFORM_D3D8;
 }
 
-void NativeTexture::readPs2(ifstream &rw)
+void NativeTexture::readPs2(istream &rw)
 {
 	HeaderInfo header;
 

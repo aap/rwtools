@@ -63,7 +63,7 @@ convertattrib(float *dst, char *data, int type, int normalized, int n)
 }
 
 void
-Geometry::readOglNativeData(ifstream &rw, int size)
+Geometry::readOglNativeData(istream &rw, int size)
 {
 	uint32 nattribs;
 	uint32 *attribs, *ap;

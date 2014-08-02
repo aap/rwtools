@@ -12,7 +12,7 @@ namespace rw {
 
 static uint32 index;
 
-void Geometry::readPs2NativeData(ifstream &rw)
+void Geometry::readPs2NativeData(istream &rw)
 {
 	HeaderInfo header;
 
@@ -123,7 +123,7 @@ void Geometry::readPs2NativeData(ifstream &rw)
 
 
 void Geometry::readData(uint32 vertexCount, uint32 type,
-                        uint32 split, ifstream &rw)
+                        uint32 split, istream &rw)
 {
 	float32 vertexScale = (flags & FLAGS_PRELIT) ? VERTSCALE1 : VERTSCALE2;
 

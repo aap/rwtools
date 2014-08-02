@@ -1,9 +1,9 @@
 #include <cstdlib>
 #include <cstdio>
-
+#include <fstream>
 #include <renderware.h>
-using namespace std;
 
+using namespace std;
 using namespace rw;
 
 int main(int argc, char *argv[])

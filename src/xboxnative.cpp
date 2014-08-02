@@ -7,7 +7,7 @@ using namespace std;
 
 namespace rw {
 
-void Geometry::readXboxNativeSkin(ifstream &rw)
+void Geometry::readXboxNativeSkin(istream &rw)
 {
 	HeaderInfo header;
 
@@ -70,7 +70,7 @@ void Geometry::readXboxNativeSkin(ifstream &rw)
 		        0x10*sizeof(float32));
 }
 
-void Geometry::readXboxNativeData(ifstream &rw)
+void Geometry::readXboxNativeData(istream &rw)
 {
 	HeaderInfo header;
 

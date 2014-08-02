@@ -5,7 +5,6 @@
 #endif
 
 #include <iostream>
-#include <fstream>
 #include <vector>
 #include <string>
 
@@ -143,25 +142,25 @@ struct HeaderInfo
 	uint32 type;
 	uint32 length;
 	uint32 version;
-	void read(std::ifstream &rw);
-	uint32 write(std::ofstream &rw);
+	void read(std::istream &rw);
+	uint32 write(std::ostream &rw);
 };
 
 void ChunkNotFound(CHUNK_TYPE chunk, uint32 address);
-uint32 writeInt8(int8 tmp, std::ofstream &rw);
-uint32 writeUInt8(uint8 tmp, std::ofstream &rw);
-uint32 writeInt16(int16 tmp, std::ofstream &rw);
-uint32 writeUInt16(uint16 tmp, std::ofstream &rw);
-uint32 writeInt32(int32 tmp, std::ofstream &rw);
-uint32 writeUInt32(uint32 tmp, std::ofstream &rw);
-uint32 writeFloat32(float32 tmp, std::ofstream &rw);
-int8 readInt8(std::ifstream &rw);
-uint8 readUInt8(std::ifstream &rw);
-int16 readInt16(std::ifstream &rw);
-uint16 readUInt16(std::ifstream &rw);
-int32 readInt32(std::ifstream &rw);
-uint32 readUInt32(std::ifstream &rw);
-float32 readFloat32(std::ifstream &rw);
+uint32 writeInt8(int8 tmp, std::ostream &rw);
+uint32 writeUInt8(uint8 tmp, std::ostream &rw);
+uint32 writeInt16(int16 tmp, std::ostream &rw);
+uint32 writeUInt16(uint16 tmp, std::ostream &rw);
+uint32 writeInt32(int32 tmp, std::ostream &rw);
+uint32 writeUInt32(uint32 tmp, std::ostream &rw);
+uint32 writeFloat32(float32 tmp, std::ostream &rw);
+int8 readInt8(std::istream &rw);
+uint8 readUInt8(std::istream &rw);
+int16 readInt16(std::istream &rw);
+uint16 readUInt16(std::istream &rw);
+int32 readInt32(std::istream &rw);
+uint32 readUInt32(std::istream &rw);
+float32 readFloat32(std::istream &rw);
 
 std::string getChunkName(uint32 i);
 /*
@@ -237,10 +236,10 @@ struct Frame
 	std::vector<uint32> hAnimBoneTypes;
 
 	/* functions */
-	void readStruct(std::ifstream &dff);
-	void readExtension(std::ifstream &dff);
-	uint32 writeStruct(std::ofstream &dff);
-	uint32 writeExtension(std::ofstream &dff);
+	void readStruct(std::istream &dff);
+	void readExtension(std::istream &dff);
+	uint32 writeStruct(std::ostream &dff);
+	uint32 writeExtension(std::ostream &dff);
 
 	void dump(uint32 index, std::string ind = "");
 
@@ -273,9 +272,9 @@ struct Atomic
 	uint32 materialFxVal;
 
 	/* functions */
-	void read(std::ifstream &dff);
-	void readExtension(std::ifstream &dff);
-	uint32 write(std::ofstream &dff);
+	void read(std::istream &dff);
+	void readExtension(std::istream &dff);
+	uint32 write(std::ostream &dff);
 	void dump(uint32 index, std::string ind = "");
 
 	Atomic(void);
@@ -293,9 +292,9 @@ struct Texture
 	bool hasSkyMipmap;
 
 	/* functions */
-	void read(std::ifstream &dff);
-	uint32 write(std::ofstream &dff);
-	void readExtension(std::ifstream &dff);
+	void read(std::istream &dff);
+	uint32 write(std::ostream &dff);
+	void readExtension(std::istream &dff);
 	void dump(std::string ind = "");
 
 	Texture(void);
@@ -355,9 +354,9 @@ struct Material
 	// to do
 
 	/* functions */
-	void read(std::ifstream &dff);
-	void readExtension(std::ifstream &dff);
-	uint32 write(std::ofstream &dff);
+	void read(std::istream &dff);
+	void readExtension(std::istream &dff);
+	uint32 write(std::ostream &dff);
 
 	void dump(uint32 index, std::string ind = "");
 
@@ -442,11 +441,11 @@ struct Geometry
 	bool hasMorph;
 
 	/* functions */
-	void read(std::ifstream &dff);
-	void readExtension(std::ifstream &dff);
-	void readMeshExtension(std::ifstream &dff);
-	uint32 write(std::ofstream &dff);
-	uint32 writeMeshExtension(std::ofstream &dff);
+	void read(std::istream &dff);
+	void readExtension(std::istream &dff);
+	void readMeshExtension(std::istream &dff);
+	uint32 write(std::ostream &dff);
+	uint32 writeMeshExtension(std::ostream &dff);
 
 	void cleanUp(void);
 
@@ -457,16 +456,16 @@ struct Geometry
 	Geometry &operator= (const Geometry &other);
 	~Geometry(void);
 private:
-	void readPs2NativeData(std::ifstream &dff);
-	void readXboxNativeData(std::ifstream &dff);
-	void readXboxNativeSkin(std::ifstream &dff);
-	void readOglNativeData(std::ifstream &dff, int size);
-	void readNativeSkinMatrices(std::ifstream &dff);
+	void readPs2NativeData(std::istream &dff);
+	void readXboxNativeData(std::istream &dff);
+	void readXboxNativeSkin(std::istream &dff);
+	void readOglNativeData(std::istream &dff, int size);
+	void readNativeSkinMatrices(std::istream &dff);
 	bool isDegenerateFace(uint32 i, uint32 j, uint32 k);
 	void generateFaces(void);
 	void deleteOverlapping(std::vector<uint32> &typesRead, uint32 split);
 	void readData(uint32 vertexCount, uint32 type, // native data block
-                      uint32 split, std::ifstream &dff);
+                      uint32 split, std::istream &dff);
 
 	uint32 addTempVertexIfNew(uint32 index);
 };
@@ -482,9 +481,9 @@ struct Clump
 	// to do
 
 	/* functions */
-	void read(std::ifstream &dff);
-	void readExtension(std::ifstream &dff);
-	uint32 write(std::ofstream &dff);
+	void read(std::istream &dff);
+	void readExtension(std::istream &dff);
+	uint32 write(std::ostream &dff);
 	void dump(bool detailed = false);
 	void clear(void);
 };
@@ -520,10 +519,10 @@ struct NativeTexture
 	uint32 dxtCompression;
 
 	/* functions */
-	void readD3d(std::ifstream &txd);
-	void readPs2(std::ifstream &txd);
-	void readXbox(std::ifstream &txd);
-	uint32 writeD3d(std::ofstream &txd);
+	void readD3d(std::istream &txd);
+	void readPs2(std::istream &txd);
+	void readXbox(std::istream &txd);
+	uint32 writeD3d(std::ostream &txd);
 	void writeTGA(void);
 
 	void convertFromPS2(void);
@@ -546,8 +545,8 @@ struct TextureDictionary
 	std::vector<NativeTexture> texList;
 
 	/* functions */
-	void read(std::ifstream &txd);
-	uint32 write(std::ofstream &txd);
+	void read(std::istream &txd);
+	uint32 write(std::ostream &txd);
 	void clear(void);
 	~TextureDictionary(void);
 };
