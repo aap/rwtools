@@ -28,7 +28,7 @@ main(int argc, char *argv[])
 			<< " " << t.width[0] << " " << t.height[0] << " "
 			<< " " << t.depth << " " << hex << t.rasterFormat << endl;
 		if (txd.texList[i].platform == PLATFORM_PS2)
-			txd.texList[i].convertFromPS2();
+			txd.texList[i].convertFromPS2(0x40);
 		if (txd.texList[i].platform == PLATFORM_XBOX)
 			txd.texList[i].convertFromXbox();
 		if (txd.texList[i].dxtCompression)

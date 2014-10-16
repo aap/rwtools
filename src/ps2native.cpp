@@ -34,7 +34,6 @@ void Geometry::readPs2NativeData(istream &rw)
 		splits[i].indices.clear();
 		uint32 end = splitSize + rw.tellg();
 
-		// chunk8 and chunk32 contain the same data !!
 		uint8 chunk8[16];
 		uint32 *chunk32 = (uint32 *) chunk8;
 
@@ -119,6 +118,19 @@ void Geometry::readPs2NativeData(istream &rw)
 		}
 		this->numIndices += splits[i].indices.size();
 	}
+
+	int nverts = vertices.size()/3;
+	// this happens in some objects
+	if(flags & FLAGS_NORMALS && normals.size() == 0)
+		normals.resize(vertices.size());
+	// never seen this but be careful
+	if(flags & FLAGS_PRELIT && vertexColors.size() == 0)
+		vertexColors.resize(nverts*4);
+	// this also happens
+	if(flags & FLAGS_TEXTURED || flags & FLAGS_TEXTURED2)
+		for(uint32 i = 0; i < numUVs; i++)
+			if(texCoords[i].size() == 0)
+				texCoords[i].resize(nverts*2);
 }
 
 
@@ -127,7 +139,7 @@ void Geometry::readData(uint32 vertexCount, uint32 type,
 {
 	float32 vertexScale = (flags & FLAGS_PRELIT) ? VERTSCALE1 : VERTSCALE2;
 
-	uint32 size;
+	uint32 size = 0;
 	type &= 0xFF00FFFF;
 	/* TODO: read greater chunks */
 	switch (type) {
@@ -162,6 +174,12 @@ void Geometry::readData(uint32 vertexCount, uint32 type,
 			texCoords[0].push_back(readFloat32(rw));
 			texCoords[0].push_back(readFloat32(rw));
 		}
+		for (uint32 i = 1; i < numUVs; i++) {
+			for (uint32 j = 0; j < vertexCount; j++) {
+				texCoords[i].push_back(0);
+				texCoords[i].push_back(0);
+			}
+		}
 		break;
 	} case 0x6D008001: {
 		size = 2 * sizeof(int16);
@@ -182,6 +200,12 @@ void Geometry::readData(uint32 vertexCount, uint32 type,
 			rw.read((char *) (texCoord), size);
 			texCoords[0].push_back(texCoord[0] * UVSCALE);
 			texCoords[0].push_back(texCoord[1] * UVSCALE);
+		}
+		for (uint32 i = 1; i < numUVs; i++) {
+			for (uint32 j = 0; j < vertexCount; j++) {
+				texCoords[i].push_back(0);
+				texCoords[i].push_back(0);
+			}
 		}
 		break;
 	/* Vertex colors */
@@ -276,16 +300,16 @@ void Geometry::deleteOverlapping(vector<uint32> &typesRead, uint32 split)
 			index -= 2;
 			break;
 		/* Texture coordinates */
+		case 0x64008001:
+		case 0x65008001:
+//			size = texCoords[0].size();
+//			texCoords[0].resize(size-2*2);
+//			break;
 		case 0x6D008001:
 			for (uint32 j = 0; j < numUVs; j++) {
 				size = texCoords[j].size();
 				texCoords[j].resize(size-2*2);
 			}
-			break;
-		case 0x64008001:
-		case 0x65008001:
-			size = texCoords[0].size();
-			texCoords[0].resize(size-2*2);
 			break;
 		/* Vertex colors */
 		case 0x6D00C002:

@@ -316,6 +316,8 @@ struct MatFx
 	bool hasDualPassMap;
 	Texture dualPassMap;
 
+	void dump(std::string ind = "");
+
 	MatFx(void);
 };
 
@@ -514,6 +516,10 @@ struct NativeTexture
 	// PS2
 	std::vector<uint32> swizzleWidth;
 	std::vector<uint32> swizzleHeight;
+	// bit 0: alpha values above (or equal to) the threshold
+	// bit 1: alpha values below the threshold
+	// both 0: no info
+	uint32 alphaDistribution;
 
 	// PC
 	uint32 dxtCompression;
@@ -525,7 +531,7 @@ struct NativeTexture
 	uint32 writeD3d(std::ostream &txd);
 	void writeTGA(void);
 
-	void convertFromPS2(void);
+	void convertFromPS2(uint32 aref);
 	void processPs2Swizzle(uint32 mip);
 	void convertFromXbox(void);
 	void decompressDxt(void);

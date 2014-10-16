@@ -44,7 +44,6 @@ int main(int argc, char *argv[])
 			for (uint32 i = 0; i < clump->geometryList.size(); i++)
 				clump->geometryList[i].cleanUp();
 			curArg++;
-			cout << "cleaning up\n";
 		}
 	}
 

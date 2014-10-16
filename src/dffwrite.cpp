@@ -687,6 +687,7 @@ uint32 Material::write(ostream &rw)
 				bytesWritten += 4 - len % 4;
 			}
 			rw.seekp(4, ios::cur);
+			bytesWritten += 4;
 			WRITE_HEADER(CHUNK_SPECULARMAT);
 		}
 		bytesWritten += writtenBytesReturn;

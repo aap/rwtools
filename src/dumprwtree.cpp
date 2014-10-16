@@ -4,7 +4,7 @@
 using namespace std;
 using namespace rw;
 
-void readsection(HeaderInfo &rwh, uint32 vers, uint32 level, ifstream &rw)
+void readsection(HeaderInfo &rwh, uint32 vers, uint32 level, istream &rw)
 {
 	for (uint32 i = 0; i < level; i++)
 		cout << "  ";

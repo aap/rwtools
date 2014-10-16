@@ -160,6 +160,7 @@ void Atomic::readExtension(istream &rw)
 			hasRightToRender = true;
 			rightToRenderVal1 = readUInt32(rw);
 			rightToRenderVal2 = readUInt32(rw);
+//			cout << "atm Righttorender: " << hex << rightToRenderVal1 << " " << rightToRenderVal2 << endl;
 			break;
 		case CHUNK_PARTICLES:
 			hasParticles = true;
@@ -172,6 +173,7 @@ void Atomic::readExtension(istream &rw)
 		case CHUNK_PIPELINESET:
 			hasPipelineSet = true;
 			pipelineSetVal = readUInt32(rw);
+//cout << filename << " pipelineset " << hex << pipelineSetVal << endl;
 			break;
 		default:
 			rw.seekg(header.length, ios::cur);
@@ -190,8 +192,10 @@ void Atomic::dump(uint32 index, string ind)
 
 	if (hasRightToRender) {
 		cout << hex;
-		cout << ind << "rightToRenderVal1: " << rightToRenderVal1<<endl;
-		cout << ind << "rightToRenderVal2: " << rightToRenderVal2<<endl;
+		cout << ind << "Right to Render {\n";
+		cout << ind << ind << "val1: " << rightToRenderVal1<<endl;
+		cout << ind << ind << "val2: " << rightToRenderVal2<<endl;
+		cout << ind << "}\n";
 		cout << dec;
 	}
 
@@ -924,6 +928,13 @@ void Geometry::dump(uint32 index, string ind, bool detailed)
 		ind += "  ";
 		cout << ind << "matIndex: " << splits[i].matIndex << endl;
 		cout << ind << "numIndices: "<<splits[i].indices.size() << endl;
+		cout << ind << "indices {\n";
+		if(!detailed)
+			cout << ind+"  skipping\n";
+		else
+			for(uint32 j = 0; j < splits[i].indices.size(); j++)
+				cout << ind+" " << splits[i].indices[j] << endl;
+		cout << ind << "}\n";
 		ind = ind.substr(0, ind.size()-2);
 		cout << ind << "}\n";
 	}
@@ -1077,6 +1088,7 @@ void Material::readExtension(istream &rw)
 			hasRightToRender = true;
 			rightToRenderVal1 = readUInt32(rw);
 			rightToRenderVal2 = readUInt32(rw);
+//			cout << "mat Righttorender: " << hex << rightToRenderVal1 << " " << rightToRenderVal2 << endl;
 			break;
 		case CHUNK_MATERIALEFFECTS: {
 			hasMatFx = true;
@@ -1084,6 +1096,7 @@ void Material::readExtension(istream &rw)
 			matFx->type = readUInt32(rw);
 			switch (matFx->type) {
 			case MATFX_BUMPMAP: {
+//cout << filename << " BUMPMAP\n";
 				rw.seekg(4, ios::cur); // also MATFX_BUMPMAP
 				matFx->bumpCoefficient = readFloat32(rw);
 
@@ -1112,6 +1125,7 @@ void Material::readExtension(istream &rw)
 				rw.seekg(4, ios::cur); // 0
 				break;
 			} case MATFX_BUMPENVMAP: {
+//cout << filename << " BUMPENVMAP\n";
 				rw.seekg(4, ios::cur); // MATFX_BUMPMAP
 				matFx->bumpCoefficient = readFloat32(rw);
 				matFx->hasTex1 = readUInt32(rw);
@@ -1129,6 +1143,7 @@ void Material::readExtension(istream &rw)
 					matFx->tex2.read(rw);
 				break;
 			} case MATFX_DUAL: {
+//cout << filename << " DUAL\n";
 				rw.seekg(4, ios::cur); // also MATFX_DUAL
 				matFx->srcBlend = readUInt32(rw);
 				matFx->destBlend = readUInt32(rw);
@@ -1139,10 +1154,12 @@ void Material::readExtension(istream &rw)
 				rw.seekg(4, ios::cur); // 0
 				break;
 			} case MATFX_UVTRANSFORM: {
+//cout << filename << " UVTRANSFORM\n";
 				rw.seekg(4, ios::cur);//also MATFX_UVTRANSFORM
 				rw.seekg(4, ios::cur); // 0
 				break;
 			} case MATFX_DUALUVTRANSFORM: {
+//cout << filename << " DUALUVTRANSFORM\n";
 				// never observed in gta
 				break;
 			} default:
@@ -1195,8 +1212,39 @@ void Material::dump(uint32 index, string ind)
 	cout << ind << "surfaceProps: " << surfaceProps[0] << " "
 	                                << surfaceProps[1] << " "
 	                                << surfaceProps[2] << endl;
-	if (hasTex)
+
+	if(hasTex)
 		texture.dump(ind);
+
+	if(hasMatFx)
+		matFx->dump(ind);
+
+	if(hasRightToRender){
+		cout << hex;
+		cout << ind << "Right to Render {\n";
+		cout << ind+"  " << "val1: " << rightToRenderVal1<<endl;
+		cout << ind+"  " << "val2: " << rightToRenderVal2<<endl;
+		cout << ind << "}\n";
+		cout << dec;
+	}
+
+	if(hasReflectionMat){
+		cout << ind << "Reflection Material {\n";
+		cout << ind+"  " << "amount: "
+		     << reflectionChannelAmount[0] << " "
+		     << reflectionChannelAmount[1] << " "
+		     << reflectionChannelAmount[2] << " "
+		     << reflectionChannelAmount[3] << endl;
+		cout << ind+"  " << "intensity: " << reflectionIntensity << endl;
+		cout << ind << "}\n";
+	}
+
+	if(hasSpecularMat){
+		cout << ind << "Specular Material {\n";
+		cout << ind+"  " << "level: " << specularLevel << endl;
+		cout << ind+"  " << "name: " << specularName << endl;
+		cout << ind << "}\n";
+	}
 
 	ind = ind.substr(0, ind.size()-2);
 	cout << ind << "}\n";
@@ -1281,6 +1329,40 @@ Material::~Material(void)
 	delete matFx;
 }
 
+void
+MatFx::dump(string ind)
+{
+	static const char *names[] = {
+		"INVALID",
+		"MATFX_BUMPMAP",
+		"MATFX_ENVMAP",
+		"MATFX_BUMPENVMAP",
+		"MATFX_DUAL",
+		"MATFX_UVTRANSFORM",
+		"MATFX_DUALUVTRANSFORM"
+	};
+	cout << ind << "MatFX {\n";
+	ind += "  ";
+	cout << ind << "type: " << names[type] << endl;
+	if(type == MATFX_BUMPMAP || type == MATFX_BUMPENVMAP)
+		cout << ind << "bumpCoefficient: " << bumpCoefficient << endl;
+	if(type == MATFX_ENVMAP || type == MATFX_BUMPENVMAP)
+		cout << ind << "envCoefficient: " << envCoefficient << endl;
+	if(type == MATFX_DUAL){
+		cout << ind << "srcBlend: " << srcBlend << endl;
+		cout << ind << "destBlend: " << destBlend << endl;
+	}
+	cout << ind << "textures: " << hasTex1 << " " << hasTex2 << " " << hasDualPassMap << endl;
+	if(hasTex1)
+		tex1.dump(ind);
+	if(hasTex2)
+		tex2.dump(ind);
+	if(hasDualPassMap)
+		dualPassMap.dump(ind);
+
+	ind = ind.substr(0, ind.size()-2);
+	cout << ind << "}\n";
+}
 
 MatFx::MatFx(void)
 : hasTex1(false), hasTex2(false), hasDualPassMap(false)

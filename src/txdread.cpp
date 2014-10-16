@@ -301,6 +301,8 @@ void NativeTexture::readPs2(istream &rw)
 	depth = readUInt32(rw);
 	rasterFormat = readUInt32(rw);
 
+	if(rasterFormat == 0x22504 && width[0] == 128 && height[0] == 128 && depth == 4)
+		cout << filename << endl;
 
 	uint32 unk1 = readUInt32(rw);		// what are these?
 	uint32 unk2 = readUInt32(rw);
@@ -483,7 +485,7 @@ void NativeTexture::convertTo32Bit(void)
 	// no support for other raster formats yet
 }
 
-void NativeTexture::convertFromPS2(void)
+void NativeTexture::convertFromPS2(uint32 aref)
 {
 	if (platform != PLATFORM_PS2)
 		return;
@@ -527,6 +529,12 @@ void NativeTexture::convertFromPS2(void)
 
 	if (rasterFormat & RASTER_PAL8 || rasterFormat & RASTER_PAL4) {
 		for (uint32 i = 0; i < paletteSize; i++) {
+			if ((alphaDistribution & 0x1) == 0 &&
+			    palette[i*4+3] >= aref)
+				alphaDistribution |= 0x1;
+			else if ((alphaDistribution & 0x2) == 0 &&
+			         palette[i*4+3] < aref)
+				alphaDistribution |= 0x2;
 			uint32 newalpha = palette[i*4+3] * 0xff;
 			newalpha /= 0x80;
 			palette[i*4+3] = newalpha;
@@ -849,7 +857,7 @@ void NativeTexture::writeTGA(void)
 NativeTexture::NativeTexture(void)
 : platform(0), name(""), maskName(""), filterFlags(0), rasterFormat(0),
   depth(0), palette(0), paletteSize(0), hasAlpha(false), mipmapCount(0),
-  dxtCompression(0)
+  alphaDistribution(0), dxtCompression(0)
 {
 }
 
@@ -868,6 +876,7 @@ NativeTexture::NativeTexture(const NativeTexture &orig)
   mipmapCount(orig.mipmapCount),
   swizzleWidth(orig.swizzleWidth),
   swizzleHeight(orig.swizzleHeight),
+  alphaDistribution(orig.alphaDistribution),
   dxtCompression(orig.dxtCompression)
 {
 	if (orig.palette) {

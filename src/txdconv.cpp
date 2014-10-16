@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
 	rw.close();
 	for (uint32 i = 0; i < txd->texList.size(); i++) {
 		if (txd->texList[i].platform == PLATFORM_PS2)
-			txd->texList[i].convertFromPS2();
+			txd->texList[i].convertFromPS2(0x40);
 		if (txd->texList[i].platform == PLATFORM_XBOX)
 			txd->texList[i].convertFromXbox();
 		if (txd->texList[i].dxtCompression)
