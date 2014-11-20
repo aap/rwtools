@@ -1,0 +1,13 @@
+This library reads (mainly GTA) Renderware files from the following platforms:
+
+DFF: Generic (PC), PS2, Xbox, OpenGL (Mobile)
+
+TXD: PC, PS2, Xbox
+
+Some chunks are not read and thus skipped as of now, though.
+
+It can also write generic DFFs and PC TXDs so you can convert files
+to the familiar PC format.
+Some useful example programs can be found in `bin` after compilation.
+
+To compile, simple type `make`. Use MinGW/MSYS on Windows.

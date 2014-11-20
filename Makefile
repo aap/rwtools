@@ -13,7 +13,7 @@ OBJ2 := $(patsubst $(SRCDIR)/%.cpp,$(BUILDDIR)/%.o,$(SRC2))
 DEP := $(patsubst $(SRCDIR)/%.cpp,$(BUILDDIR)/%.d,$(SRC) $(SRC2))
 LIB = $(LIBDIR)/librwtools.a
 BIN = $(patsubst $(BUILDDIR)/%.o,%,$(OBJ2))
-CFLAGS = -I$(INCDIR) -Wall -Wextra -g -O3 -pg -DDEBUG
+CFLAGS = -I$(INCDIR) -Wall -Wextra -g -O3 -DDEBUG
 LINK = $(LIB) 
 
 all: $(LIB) bins
