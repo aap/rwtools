@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
 	if (argc < 3) {
 		cerr << "usage: " << argv[0] << " in.txd out.txd " <<
 		        "([-v version_string] or [-V version])\n";
-		cout << "Flags must be set in the above order.\n";
+		cerr << "Flags must be set in the above order.\n";
 		cerr << "-v: Known versions: GTA3, GTAVC_1, GTAVC_2, GTASA\n";
 		cerr << "-V: Set any version you like in hexadecimal.\n";
 		return 1;
@@ -42,9 +42,13 @@ int main(int argc, char *argv[])
 	version = VCPC;
 
 	string arg;
-	if (argc > curArg + 1) {
+	while (argc > curArg) {
 		arg = argv[curArg];
 		if (arg == "-v") {
+			if (argc <= curArg+1) {
+				cerr << "missing argument\n";
+				return 1;
+			}
 			string verstring = argv[curArg+1];
 			curArg += 2;
 			if (verstring == "GTA3")
@@ -55,14 +59,24 @@ int main(int argc, char *argv[])
 				version = VCPC;
 			else if (verstring == "GTASA")
 				version = SA;
-			else
-				cout << "unknown version\n";
+			else {
+				cerr << "unknown version\n";
+				return 1;
+			}
 		}
 		if (arg == "-V") {
+			if (argc <= curArg+1) {
+				cerr << "missing argument\n";
+				return 1;
+			}
 			sscanf(argv[curArg+1], "%x", &version);
 			curArg += 2;
 		}
-		cout << "writing version: " << hex << version << endl;
+		if (arg == "-9") {
+			for (uint32 i = 0; i < txd->texList.size(); i++)
+				txd->texList[i].platform = PLATFORM_D3D9;
+			curArg++;
+		}
 	}
 
 	txd->write(out);

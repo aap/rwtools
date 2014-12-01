@@ -6,7 +6,7 @@ using namespace std;
 
 namespace rw {
 
-/* You can write ONE header per C BLOCk using these macros */
+/* You can write ONE header per C BLOCK using these macros */
 #define SKIP_HEADER()\
 	uint32 bytesWritten = 0;\
 	uint32 headerPos = rw.tellp();\

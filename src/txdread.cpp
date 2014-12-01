@@ -97,22 +97,26 @@ void NativeTexture::readD3d(istream &rw)
 	maskName = buffer;
 
 	rasterFormat = readUInt32(rw);
-//	cout << hex << rasterFormat << endl;
+//cout << hex << rasterFormat << " ";
 
 	hasAlpha = false;
 	char fourcc[5];
 	fourcc[4] = 0;
-	if (platform == PLATFORM_D3D9)
+	if (platform == PLATFORM_D3D9) {
 		rw.read(fourcc, 4*sizeof(char));
-	else
+	} else {
 		hasAlpha = readUInt32(rw);
+//cout << hasAlpha << " ";
+	}
 
 	width.push_back(readUInt16(rw));
 	height.push_back(readUInt16(rw));
 	depth = readUInt8(rw);
 	mipmapCount = readUInt8(rw);
+//cout << dec << mipmapCount << " ";
 	rw.seekg(sizeof(int8), ios::cur); // raster type (always 4)
 	dxtCompression = readUInt8(rw);
+//cout << dxtCompression << " ";
 
 	if (platform == PLATFORM_D3D9) {
 		hasAlpha = dxtCompression & 0x1;
@@ -120,6 +124,7 @@ void NativeTexture::readD3d(istream &rw)
 			dxtCompression = fourcc[3] - '0';
 		else
 			dxtCompression = 0;
+//cout << fourcc << " ";
 	}
 //	cout << hasAlpha << " " << maskName << " " << name << endl;
 
@@ -156,6 +161,7 @@ void NativeTexture::readD3d(istream &rw)
 		rw.read(reinterpret_cast <char *> (&texels[i][0]),
 		        dataSize*sizeof(uint8));
 	}
+//cout << endl;
 }
 
 void NativeTexture::readXbox(istream &rw)
