@@ -102,6 +102,17 @@ uint32 Clump::write(ostream &rw)
 	// Extension
 	{
 		SKIP_HEADER();
+		
+		// Collision
+		writtenBytesReturn = 0;
+		if (hasCollision) {
+			SKIP_HEADER();
+			rw.write((char*)&colData[0], colData.size());
+			bytesWritten += colData.size();
+			WRITE_HEADER(CHUNK_COLLISIONMODEL);
+		}
+		bytesWritten += writtenBytesReturn;
+
 		WRITE_HEADER(CHUNK_EXTENSION);
 	}
 	bytesWritten += writtenBytesReturn;

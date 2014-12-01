@@ -79,7 +79,9 @@ void Clump::readExtension(istream &rw)
 		header.read(rw);
 		switch (header.type) {
 		case CHUNK_COLLISIONMODEL:
-			rw.seekg(header.length, ios::cur);
+			hasCollision = true;
+			colData.resize(header.length);
+			rw.read((char*)&colData[0], header.length);
 			break;
 		default:
 			rw.seekg(header.length, ios::cur);
@@ -124,6 +126,7 @@ void Clump::clear(void)
 	atomicList.clear();
 	geometryList.clear();
 	frameList.clear();
+	colData.clear();
 }
 
 /*

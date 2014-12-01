@@ -480,7 +480,9 @@ struct Clump
 
 	/* Extensions */
 	/* collision file */
-	// to do
+	// to do, temporary solution
+	bool hasCollision;
+	std::vector<uint8> colData;
 
 	/* functions */
 	void read(std::istream &dff);
