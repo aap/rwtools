@@ -411,6 +411,11 @@ void NativeTexture::readPs2(istream &rw)
 		// else 8 2 4
 	}
 	rasterFormat &= 0xff00;
+	if ((rasterFormat & RASTER_8888) && !hasAlpha) {
+		rasterFormat &= ~RASTER_8888;
+		rasterFormat |= RASTER_888;
+	}
+//cout << hex << rasterFormat << " " << hasAlpha << endl;
 }
 
 void NativeTexture::convertTo32Bit(void)

@@ -62,6 +62,7 @@ void Clump::read(istream& rw)
 		READ_HEADER(CHUNK_LIGHT);
 		rw.seekg(header.length, ios::cur);
 	}
+	hasCollision = false;
 
 	readExtension(rw);
 }

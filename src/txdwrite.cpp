@@ -39,6 +39,7 @@ uint32 TextureDictionary::write(ostream &rw)
 	{
 		SKIP_HEADER();
 		bytesWritten += writeUInt16(texList.size(), rw);
+		// TODO, wtf is that?
 		bytesWritten += writeUInt16(0, rw);
 		WRITE_HEADER(CHUNK_STRUCT);
 	}
@@ -94,6 +95,11 @@ uint32 NativeTexture::writeD3d(ostream &rw)
 		bytesWritten += 2*32;
 
 		bytesWritten += writeUInt32(rasterFormat, rw);
+/*
+if(rasterFormat == RASTER_8888 && !hasAlpha ||
+   rasterFormat == RASTER_888 && hasAlpha)
+	cout << "mismatch " << hex << rasterFormat << endl;
+*/
 		if (platform == PLATFORM_D3D8) {
 			bytesWritten += writeUInt32(hasAlpha, rw);
 		} else {
