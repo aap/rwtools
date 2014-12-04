@@ -12,6 +12,7 @@ main(int argc, char *argv[])
 	    sizeof(uint8)  != 1 || sizeof(int8)  != 1 ||
 	    sizeof(float32) != 4) {
 		cerr << "type size not correct\n";
+		return 1;
 	}
 	if (argc < 2) {
 		cerr << "Usage: " << argv[0] << " txd\n";
