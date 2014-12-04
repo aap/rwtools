@@ -70,25 +70,32 @@ main(int argc, char *argv[])
 		usage();
 
 	filename = argv[0];
-	ifstream dff(argv[0], ios::binary);
-	Clump *clump = new Clump;
-	clump->read(dff);
-	dff.close();
+	ifstream in(argv[0], ios::binary);
+	if(in.fail()){
+		cerr << "cannot open " << argv[0] << endl;
+		return 1;
+	}
 
 	ofstream out(argv[1], ios::binary);
+	if(out.fail()){
+		cerr << "cannot open " << argv[1] << endl;
+		return 1;
+	}
+
+	Clump *clump = new Clump;
+	clump->read(in);
+	in.close();
 
 	if(cleanflag)
 		for (uint32 i = 0; i < clump->geometryList.size(); i++)
 			clump->geometryList[i].cleanUp();
 
-	cout << dumpflag << endl;
 	if(dumpflag)
 		clump->dump(dumpflag > 1);
 
 	clump->write(out);
-	out.close();
-
 	delete clump;
+	out.close();
 
 	return 0;
 }

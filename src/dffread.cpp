@@ -340,11 +340,14 @@ void Geometry::read(istream &rw)
 	vertexCount = readUInt32(rw);
 	rw.seekg(4, ios::cur); /* number of morph targets, uninteresting */
 	// skip light info
-	if (header.version == GTA3_1 || header.version == GTA3_2 ||
-	    header.version == GTA3_3 || header.version == GTA3_4 ||
-	    header.version == VCPS2) {
+	if (header.version < 0x34000)
 		rw.seekg(12, ios::cur);
-	}
+
+//	if (header.build == GTA3_1 || header.build == GTA3_2 ||
+//	    header.build == GTA3_3 || header.build == GTA3_4 ||
+//	    header.build == VCPS2) {
+//		rw.seekg(12, ios::cur);
+//	}
 
 	if (!hasNativeGeometry) {
 		if (flags & FLAGS_PRELIT) {
@@ -439,9 +442,9 @@ Geometry::readExtension(istream &rw)
 		} case CHUNK_NATIVEDATA: {
 			streampos beg = rw.tellg();
 			uint32 size = header.length;
-			uint32 ver = header.version;
+			uint32 build = header.build;
 			header.read(rw);
-			if(header.version==ver && header.type==CHUNK_STRUCT){
+			if(header.build==build && header.type==CHUNK_STRUCT){
 				uint32 platform = readUInt32(rw);
 				rw.seekg(beg, ios::beg);
 				if(platform == PLATFORM_PS2)

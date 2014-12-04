@@ -24,7 +24,7 @@ namespace rw {
 uint32 TextureDictionary::write(ostream &rw)
 {
 	HeaderInfo header;
-	header.version = version;
+	header.build = version;
 	uint32 writtenBytesReturn;
 
 	/*
@@ -71,7 +71,7 @@ uint32 TextureDictionary::write(ostream &rw)
 uint32 NativeTexture::writeD3d(ostream &rw)
 {
 	HeaderInfo header;
-	header.version = version;
+	header.build = version;
 	uint32 writtenBytesReturn;
 
 	if (platform != PLATFORM_D3D8 &&

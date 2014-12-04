@@ -141,8 +141,10 @@ struct HeaderInfo
 {
 	uint32 type;
 	uint32 length;
+	uint32 build;
 	uint32 version;
 	void read(std::istream &rw);
+	void peek(std::istream &rw);
 	uint32 write(std::ostream &rw);
 };
 
@@ -163,14 +165,10 @@ uint32 readUInt32(std::istream &rw);
 float32 readFloat32(std::istream &rw);
 
 std::string getChunkName(uint32 i);
+
 /*
  * DFFs
  */
-
-//#define NORMALSCALE (1.0/128.0)
-//#define	VERTSCALE1 (1.0/128.0)	/* normally used */
-//#define	VERTSCALE2 (1.0/1024.0)	/* used by objects with normals */
-//#define	UVSCALE (1.0/4096.0)
 
 enum { 
         FLAGS_TRISTRIP   = 0x01, 

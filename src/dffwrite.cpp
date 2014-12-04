@@ -29,7 +29,7 @@ uint32 version;
 uint32 Clump::write(ostream &rw)
 {
 	HeaderInfo header;
-	header.version = version;
+	header.build = version;
 	uint32 writtenBytesReturn;
 
 	/*
@@ -129,7 +129,7 @@ uint32 Clump::write(ostream &rw)
 uint32 Atomic::write(ostream &rw)
 {
 	HeaderInfo header;
-	header.version = version;
+	header.build = version;
 	uint32 writtenBytesReturn;
 
 	// Atomic
@@ -217,7 +217,7 @@ uint32 Frame::writeStruct(ostream &rw)
 uint32 Frame::writeExtension(ostream &rw)
 {
 	HeaderInfo header;
-	header.version = version;
+	header.build = version;
 	uint32 writtenBytesReturn;
 
 	// Extension
@@ -264,7 +264,7 @@ uint32 Frame::writeExtension(ostream &rw)
 uint32 Geometry::write(ostream &rw)
 {
 	HeaderInfo header;
-	header.version = version;
+	header.build = version;
 	uint32 writtenBytesReturn;
 
 	// Geometry
@@ -293,9 +293,9 @@ uint32 Geometry::write(ostream &rw)
 		/* morph targets are always just 1 */
 		bytesWritten += writeUInt32(1, rw);
 
-		if (header.version == GTA3_1 || header.version == GTA3_2 ||
-		    header.version == GTA3_3 || header.version == GTA3_4 ||
-		    header.version == VCPS2) {
+		if (header.build == GTA3_1 || header.build == GTA3_2 ||
+		    header.build == GTA3_3 || header.build == GTA3_4 ||
+		    header.build == VCPS2) {
 			bytesWritten += writeFloat32(1.0f, rw);
 			bytesWritten += writeFloat32(1.0f, rw);
 			bytesWritten += writeFloat32(1.0f, rw);
@@ -469,7 +469,7 @@ uint32 Geometry::write(ostream &rw)
 uint32 Geometry::writeMeshExtension(ostream &rw)
 {
 	HeaderInfo header;
-	header.version = version;
+	header.build = version;
 	uint32 writtenBytesReturn;
 
 	SKIP_HEADER();
@@ -542,7 +542,7 @@ uint32 Geometry::writeMeshExtension(ostream &rw)
 uint32 Material::write(ostream &rw)
 {
 	HeaderInfo header;
-	header.version = version;
+	header.build = version;
 	uint32 writtenBytesReturn;
 
 	// Material
@@ -722,7 +722,7 @@ uint32 Material::write(ostream &rw)
 uint32 Texture::write(ostream &rw)
 {
 	HeaderInfo header;
-	header.version = version;
+	header.build = version;
 	uint32 writtenBytesReturn;
 
 	// Material

@@ -5,14 +5,37 @@ using namespace std;
 
 namespace rw {
 
-void HeaderInfo::read(istream& rw)
+void
+HeaderInfo::read(istream &rw)
 {
 	type = readUInt32(rw);
 	length = readUInt32(rw);
-	version = readUInt32(rw);
+	build = readUInt32(rw);
+	if(build & 0xFFFF0000)
+		version = ((build >> 14) & 0x3FF00) |
+		          ((build >> 16) & 0x3F) |
+		          0x30000;
+	else
+		version = build << 8;
 }
 
-uint32 HeaderInfo::write(ostream &rw)
+void
+HeaderInfo::peek(istream &rw)
+{
+	type = readUInt32(rw);
+	length = readUInt32(rw);
+	build = readUInt32(rw);
+	if(build & 0xFFFF0000)
+		version = ((build >> 14) & 0x3FF00) |
+		          ((build >> 16) & 0x3F) |
+		          0x30000;
+	else
+		version = build << 8;
+	rw.seekg(-12, ios::cur);
+}
+
+uint32
+HeaderInfo::write(ostream &rw)
 {
 	writeUInt32(type, rw);
 	writeUInt32(length, rw);
@@ -20,98 +43,113 @@ uint32 HeaderInfo::write(ostream &rw)
 	return 3*sizeof(uint32);
 }
 
-void ChunkNotFound(CHUNK_TYPE chunk, uint32 address)
+void
+ChunkNotFound(CHUNK_TYPE chunk, uint32 address)
 {
 	cerr << "chunk " << hex << chunk << " not found at 0x";
 	cerr << hex << address << endl;
 	exit(1);
 }
 
-uint32 writeInt8(int8 tmp, ostream &rw)
+uint32
+writeInt8(int8 tmp, ostream &rw)
 {
 	rw.write(reinterpret_cast <char *> (&tmp), sizeof(int8));
 	return sizeof(int8);
 }
 
-uint32 writeUInt8(uint8 tmp, ostream &rw)
+uint32
+writeUInt8(uint8 tmp, ostream &rw)
 {
 	rw.write(reinterpret_cast <char *> (&tmp), sizeof(uint8));
 	return sizeof(uint8);
 }
 
-uint32 writeInt16(int16 tmp, ostream &rw)
+uint32
+writeInt16(int16 tmp, ostream &rw)
 {
 	rw.write(reinterpret_cast <char *> (&tmp), sizeof(int16));
 	return sizeof(int16);
 }
 
-uint32 writeUInt16(uint16 tmp, ostream &rw)
+uint32
+writeUInt16(uint16 tmp, ostream &rw)
 {
 	rw.write(reinterpret_cast <char *> (&tmp), sizeof(uint16));
 	return sizeof(uint16);
 }
 
-uint32 writeInt32(int32 tmp, ostream &rw)
+uint32
+writeInt32(int32 tmp, ostream &rw)
 {
 	rw.write(reinterpret_cast <char *> (&tmp), sizeof(int32));
 	return sizeof(int32);
 }
 
-uint32 writeUInt32(uint32 tmp, ostream &rw)
+uint32
+writeUInt32(uint32 tmp, ostream &rw)
 {
 	rw.write(reinterpret_cast <char *> (&tmp), sizeof(uint32));
 	return sizeof(uint32);
 }
 
-uint32 writeFloat32(float32 tmp, ostream &rw)
+uint32
+writeFloat32(float32 tmp, ostream &rw)
 {
 	rw.write(reinterpret_cast <char *> (&tmp), sizeof(float32));
 	return sizeof(float32);
 }
 
-int8 readInt8(istream &rw)
+int8
+readInt8(istream &rw)
 {
 	int8 tmp;
 	rw.read(reinterpret_cast <char *> (&tmp), sizeof(int8));
 	return tmp;
 }
 
-uint8 readUInt8(istream &rw)
+uint8
+readUInt8(istream &rw)
 {
 	uint8 tmp;
 	rw.read(reinterpret_cast <char *> (&tmp), sizeof(uint8));
 	return tmp;
 }
 
-int16 readInt16(istream &rw)
+int16
+readInt16(istream &rw)
 {
 	int16 tmp;
 	rw.read(reinterpret_cast <char *> (&tmp), sizeof(int16));
 	return tmp;
 }
 
-uint16 readUInt16(istream &rw)
+uint16
+readUInt16(istream &rw)
 {
 	uint16 tmp;
 	rw.read(reinterpret_cast <char *> (&tmp), sizeof(uint16));
 	return tmp;
 }
 
-int32 readInt32(istream &rw)
+int32
+readInt32(istream &rw)
 {
 	int32 tmp;
 	rw.read(reinterpret_cast <char *> (&tmp), sizeof(int32));
 	return tmp;
 }
 
-uint32 readUInt32(istream &rw)
+uint32
+readUInt32(istream &rw)
 {
 	uint32 tmp;
 	rw.read(reinterpret_cast <char *> (&tmp), sizeof(uint32));
 	return tmp;
 }
 
-float32 readFloat32(istream &rw)
+float32
+readFloat32(istream &rw)
 {
 	float32 tmp;
 	rw.read(reinterpret_cast <char *> (&tmp), sizeof(float32));
@@ -178,9 +216,10 @@ const char *RSchunks[] = { "Unused 1", "Unused 2", "Unused 3",
 	"Unused 16"
 };
 
-string getChunkName(uint32 i)
+string
+getChunkName(uint32 i)
 {
-	switch (i) {
+	switch(i){
 	case 0x50E:
 		return "Bin Mesh PLG";
 		break;
@@ -194,13 +233,13 @@ string getChunkName(uint32 i)
 		break;
 	}
 
-	if (i <= 45)
+	if(i <= 45)
 		return chunks[i];
-	else if (i <= 0x0253F2FF && i >= 0x0253F2F0)
+	else if(i <= 0x0253F2FF && i >= 0x0253F2F0)
 		return RSchunks[i-0x0253F2F0];
-	else if (i <= 0x0135 && i >= 0x0101)
+	else if(i <= 0x0135 && i >= 0x0101)
 		return toolkitchunks0[i-0x0101];
-	else if (i <= 0x01C0 && i >= 0x0181)
+	else if(i <= 0x01C0 && i >= 0x0181)
 		return toolkitchunks1[i-0x0181];
 	else
 		return "Unknown";
