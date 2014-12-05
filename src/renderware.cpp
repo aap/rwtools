@@ -5,42 +5,56 @@ using namespace std;
 
 namespace rw {
 
-void
+bool
 HeaderInfo::read(istream &rw)
 {
-	type = readUInt32(rw);
-	length = readUInt32(rw);
-	build = readUInt32(rw);
+	uint32 buf[3];
+	rw.read((char*)buf, 12);
+	if(rw.eof())
+		return false;
+	type = buf[0];
+	length = buf[1];
+	build = buf[2];
 	if(build & 0xFFFF0000)
 		version = ((build >> 14) & 0x3FF00) |
 		          ((build >> 16) & 0x3F) |
 		          0x30000;
 	else
 		version = build << 8;
+	return true;
 }
 
-void
+bool
 HeaderInfo::peek(istream &rw)
 {
-	type = readUInt32(rw);
-	length = readUInt32(rw);
-	build = readUInt32(rw);
-	if(build & 0xFFFF0000)
-		version = ((build >> 14) & 0x3FF00) |
-		          ((build >> 16) & 0x3F) |
-		          0x30000;
-	else
-		version = build << 8;
+	if(!read(rw))
+		return false;
 	rw.seekg(-12, ios::cur);
+	return true;
 }
 
 uint32
 HeaderInfo::write(ostream &rw)
 {
-	writeUInt32(type, rw);
-	writeUInt32(length, rw);
-	writeUInt32(version, rw);
+	uint32 buf[3];
+	buf[0] = type;
+	buf[1] = length;
+	buf[2] = build;
+	rw.write((char*)buf, 12);
 	return 3*sizeof(uint32);
+}
+
+bool
+HeaderInfo::findChunk(istream &rw, uint32 type)
+{
+	while(read(rw)){
+		if(this->type == CHUNK_NAOBJECT)
+			return false;
+		if(this->type == type)
+			return true;
+		rw.seekg(length, ios::cur);
+	}
+	return false;
 }
 
 void

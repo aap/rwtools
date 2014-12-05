@@ -164,7 +164,7 @@ void Atomic::readExtension(istream &rw)
 			hasRightToRender = true;
 			rightToRenderVal1 = readUInt32(rw);
 			rightToRenderVal2 = readUInt32(rw);
-//cout << filename << " atm Righttorender: " << hex << rightToRenderVal1 << " " << rightToRenderVal2 << endl;
+cout << filename << " atmrights: " << hex << rightToRenderVal1 << " " << rightToRenderVal2 << endl;
 			break;
 		case CHUNK_PARTICLES:
 			hasParticles = true;
@@ -1095,7 +1095,7 @@ void Material::readExtension(istream &rw)
 			hasRightToRender = true;
 			rightToRenderVal1 = readUInt32(rw);
 			rightToRenderVal2 = readUInt32(rw);
-//cout << "mat Righttorender: " << hex << rightToRenderVal1 << " " << rightToRenderVal2 << endl;
+cout << filename << " matrights: " << hex << rightToRenderVal1 << " " << rightToRenderVal2 << endl;
 			break;
 		case CHUNK_MATERIALEFFECTS: {
 			hasMatFx = true;

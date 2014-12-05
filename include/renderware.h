@@ -143,9 +143,10 @@ struct HeaderInfo
 	uint32 length;
 	uint32 build;
 	uint32 version;
-	void read(std::istream &rw);
-	void peek(std::istream &rw);
+	bool read(std::istream &rw);
+	bool peek(std::istream &rw);
 	uint32 write(std::ostream &rw);
+	bool findChunk(std::istream &rw, uint32 type);
 };
 
 void ChunkNotFound(CHUNK_TYPE chunk, uint32 address);
