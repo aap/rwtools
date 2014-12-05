@@ -4,7 +4,7 @@ BINDIR = bin
 INCDIR = include
 LIBDIR = lib
 SRC := $(patsubst %.cpp,$(SRCDIR)/%.cpp,dffread.cpp dffwrite.cpp\
-  ps2native.cpp xboxnative.cpp oglnative.cpp\
+  ps2native.cpp xboxnative.cpp oglnative.cpp uvanim.cpp\
   txdread.cpp txdwrite.cpp renderware.cpp)
 SRC2 := $(patsubst %.cpp,$(SRCDIR)/%.cpp,\
   dffconv.cpp txdconv.cpp txdex.cpp dumprwtree.cpp)

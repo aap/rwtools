@@ -27,6 +27,7 @@ usage(void)
 int
 main(int argc, char *argv[])
 {
+	HeaderInfo header;
 	if(sizeof(uint32) != 4 || sizeof(int32) != 4 ||
 	   sizeof(uint16) != 2 || sizeof(int16) != 2 ||
 	   sizeof(uint8)  != 1 || sizeof(int8)  != 1 ||
@@ -82,20 +83,32 @@ main(int argc, char *argv[])
 		return 1;
 	}
 
-	Clump *clump = new Clump;
-	clump->read(in);
-	in.close();
-
-	if(cleanflag)
-		for (uint32 i = 0; i < clump->geometryList.size(); i++)
-			clump->geometryList[i].cleanUp();
-
-	if(dumpflag)
-		clump->dump(dumpflag > 1);
-
-	clump->write(out);
-	delete clump;
+	while(header.read(in) && header.type != CHUNK_NAOBJECT){
+		if(header.type == CHUNK_CLUMP){
+			in.seekg(-12, ios::cur);
+			Clump *clump = new Clump;
+			clump->read(in);
+		
+			if(cleanflag)
+				for (uint32 i = 0; i < clump->geometryList.size(); i++)
+					clump->geometryList[i].cleanUp();
+		
+			if(dumpflag)
+				clump->dump(dumpflag > 1);
+		
+			clump->write(out);
+			delete clump;
+		}else if(header.type == CHUNK_UVANIMDICT){
+			in.seekg(-12, ios::cur);
+			UVAnimDict *uvd = new UVAnimDict;
+			uvd->read(in);
+			uvd->write(out);
+			delete uvd;
+		}else
+			in.seekg(header.length);
+	}
 	out.close();
+	in.close();
 
 	return 0;
 }

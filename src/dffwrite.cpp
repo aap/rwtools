@@ -704,6 +704,24 @@ uint32 Material::write(ostream &rw)
 		bytesWritten += writtenBytesReturn;
 
 		// UV Anim
+		writtenBytesReturn = 0;
+		if (hasUVAnim) {
+			SKIP_HEADER();
+			{
+				char buf[32];
+				memset(buf, 0, 32);
+				SKIP_HEADER();
+				bytesWritten += writeUInt32(uvVal, rw);
+				strncpy(buf, uvName.c_str(), 32);
+				rw.write(buf, 32);
+				bytesWritten += 32;
+				WRITE_HEADER(CHUNK_STRUCT);
+			}
+			bytesWritten += writtenBytesReturn;
+			WRITE_HEADER(CHUNK_UVANIMDICT);
+		}
+		bytesWritten += writtenBytesReturn;
+
 
 		WRITE_HEADER(CHUNK_EXTENSION);
 	}

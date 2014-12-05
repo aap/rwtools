@@ -15,14 +15,7 @@ void Clump::read(istream& rw)
 {
 	HeaderInfo header;
 
-	// TODO: this is only a quick and dirty fix for uv anim dicts
 	header.read(rw);
-	if (header.type != CHUNK_CLUMP) {
-		rw.seekg(header.length, ios::cur);
-		header.read(rw);
-		if (header.type != CHUNK_CLUMP)
-			return;
-	}
 
 	READ_HEADER(CHUNK_STRUCT);
 	uint32 numAtomics = readUInt32(rw);
@@ -57,6 +50,7 @@ void Clump::read(istream& rw)
 
 	/* skip lights */
 	for (uint32 i = 0; i < numLights; i++) {
+//cout << filename << " light\n";
 		READ_HEADER(CHUNK_STRUCT);
 		rw.seekg(header.length, ios::cur);
 		READ_HEADER(CHUNK_LIGHT);
@@ -164,7 +158,7 @@ void Atomic::readExtension(istream &rw)
 			hasRightToRender = true;
 			rightToRenderVal1 = readUInt32(rw);
 			rightToRenderVal2 = readUInt32(rw);
-cout << filename << " atmrights: " << hex << rightToRenderVal1 << " " << rightToRenderVal2 << endl;
+//cout << filename << " atmrights: " << hex << rightToRenderVal1 << " " << rightToRenderVal2 << endl;
 			break;
 		case CHUNK_PARTICLES:
 			hasParticles = true;
@@ -342,12 +336,6 @@ void Geometry::read(istream &rw)
 	// skip light info
 	if (header.version < 0x34000)
 		rw.seekg(12, ios::cur);
-
-//	if (header.build == GTA3_1 || header.build == GTA3_2 ||
-//	    header.build == GTA3_3 || header.build == GTA3_4 ||
-//	    header.build == VCPS2) {
-//		rw.seekg(12, ios::cur);
-//	}
 
 	if (!hasNativeGeometry) {
 		if (flags & FLAGS_PRELIT) {
@@ -1082,6 +1070,7 @@ void Material::read(istream &rw)
 void Material::readExtension(istream &rw)
 {
 	HeaderInfo header;
+	char buf[32];
 
 	READ_HEADER(CHUNK_EXTENSION);
 
@@ -1095,7 +1084,7 @@ void Material::readExtension(istream &rw)
 			hasRightToRender = true;
 			rightToRenderVal1 = readUInt32(rw);
 			rightToRenderVal2 = readUInt32(rw);
-cout << filename << " matrights: " << hex << rightToRenderVal1 << " " << rightToRenderVal2 << endl;
+//cout << filename << " matrights: " << hex << rightToRenderVal1 << " " << rightToRenderVal2 << endl;
 			break;
 		case CHUNK_MATERIALEFFECTS: {
 			hasMatFx = true;
@@ -1194,7 +1183,11 @@ cout << filename << " matrights: " << hex << rightToRenderVal1 << " " << rightTo
 			break;
 		}
 		case CHUNK_UVANIMDICT:
-			rw.seekg(header.length, ios::cur);
+			READ_HEADER(CHUNK_STRUCT);
+			hasUVAnim = true;
+			uvVal = readUInt32(rw);
+			rw.read(buf, 32);
+			uvName = buf;
 			break;
 		default:
 			rw.seekg(header.length, ios::cur);
@@ -1261,7 +1254,7 @@ Material::Material(void)
 : flags(0), unknown(0), hasTex(false), hasRightToRender(false),
   rightToRenderVal1(0), rightToRenderVal2(0), hasMatFx(false), matFx(0),
   hasReflectionMat(false), reflectionIntensity(0.0f), hasSpecularMat(false),
-  specularLevel(0.0f)
+  specularLevel(0.0f), hasUVAnim(false)
 {
 	for (int i = 0; i < 4; i++)
 		color[i] = 0;

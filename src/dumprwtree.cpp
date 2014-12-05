@@ -52,10 +52,12 @@ main(int argc, char *argv[])
 	filename = argv[1];
 	ifstream rw(argv[1], ios::binary);
 	HeaderInfo rwh;
-	rwh.read(rw);
-	int build = rwh.build;
-	int vers = rwh.version;
-	readsection(rwh, build, 0, rw);
+	int build = 0, vers = 0;
+	while(rwh.read(rw) && rwh.type != CHUNK_NAOBJECT){
+		build = rwh.build;
+		vers = rwh.version;
+		readsection(rwh, build, 0, rw);
+	}
 	cout << "RW build: " << hex << build <<
 	        " version: " << hex << vers << " " << filename << endl;
 	rw.close();

@@ -352,7 +352,9 @@ struct Material
 	std::string specularName;
 
 	/* uv anim */
-	// to do
+	bool hasUVAnim;
+	uint32 uvVal;
+	std::string uvName;
 
 	/* functions */
 	void read(std::istream &dff);
@@ -556,6 +558,24 @@ struct TextureDictionary
 	uint32 write(std::ostream &txd);
 	void clear(void);
 	~TextureDictionary(void);
+};
+
+struct UVAnimation
+{
+	std::vector<uint8> data;
+
+	void read(std::istream &dff);
+	uint32 write(std::ostream &dff);
+};
+
+struct UVAnimDict
+{
+	std::vector<UVAnimation> animList;
+
+	void read(std::istream &dff);
+	uint32 write(std::ostream &dff);
+	void clear(void);
+	~UVAnimDict(void);
 };
 
 }
