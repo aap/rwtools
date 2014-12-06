@@ -474,15 +474,28 @@ private:
 	uint32 addTempVertexIfNew(uint32 index);
 };
 
+struct Light
+{
+	int32 frameIndex;
+	float32 radius;
+	float32 color[3];
+	float32 minusCosAngle;
+	uint32 type;
+	uint32 flags;
+
+	void read(std::istream &dff);
+	uint32 write(std::ostream &dff);
+};
+
 struct Clump
 {
 	std::vector<Atomic> atomicList;
 	std::vector<Frame> frameList;
 	std::vector<Geometry> geometryList;
+	std::vector<Light> lightList;
 
 	/* Extensions */
 	/* collision file */
-	// to do, temporary solution
 	bool hasCollision;
 	std::vector<uint8> colData;
 

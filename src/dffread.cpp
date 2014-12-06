@@ -48,13 +48,12 @@ void Clump::read(istream& rw)
 	for (uint32 i = 0; i < numAtomics; i++)
 		atomicList[i].read(rw);
 
-	/* skip lights */
+	/* read lights */
+	lightList.resize(numLights);
 	for (uint32 i = 0; i < numLights; i++) {
-//cout << filename << " light\n";
 		READ_HEADER(CHUNK_STRUCT);
-		rw.seekg(header.length, ios::cur);
-		READ_HEADER(CHUNK_LIGHT);
-		rw.seekg(header.length, ios::cur);
+		lightList[i].frameIndex = readInt32(rw);
+		lightList[i].read(rw);
 	}
 	hasCollision = false;
 
@@ -121,7 +120,25 @@ void Clump::clear(void)
 	atomicList.clear();
 	geometryList.clear();
 	frameList.clear();
+	lightList.clear();
 	colData.clear();
+}
+
+void
+Light::read(std::istream &rw)
+{
+	HeaderInfo header;
+
+	READ_HEADER(CHUNK_LIGHT);
+
+	READ_HEADER(CHUNK_STRUCT);
+	radius = readFloat32(rw);
+	rw.read((char*)&color[0], 12);
+	minusCosAngle = readFloat32(rw);
+	flags = readUInt16(rw);
+	type = readUInt16(rw);
+	READ_HEADER(CHUNK_EXTENSION);
+	rw.seekg(header.length, ios::cur);
 }
 
 /*

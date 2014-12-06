@@ -99,6 +99,17 @@ uint32 Clump::write(ostream &rw)
 	for (uint32 i = 0; i < atomicList.size(); i++)
 		bytesWritten += atomicList[i].write(rw);
 
+	// Lights
+	for (uint32 i = 0; i < lightList.size(); i++) {
+		{
+			SKIP_HEADER();
+			bytesWritten += writeInt32(lightList[i].frameIndex, rw);
+			WRITE_HEADER(CHUNK_STRUCT);
+		}
+		bytesWritten += writtenBytesReturn;
+		bytesWritten += lightList[i].write(rw);
+	}
+
 	// Extension
 	{
 		SKIP_HEADER();
@@ -119,6 +130,35 @@ uint32 Clump::write(ostream &rw)
 
 	WRITE_HEADER(CHUNK_CLUMP);
 
+	return bytesWritten;
+}
+
+uint32
+Light::write(std::ostream &rw)
+{
+	HeaderInfo header;
+	header.build = version;
+	uint32 writtenBytesReturn;
+	SKIP_HEADER();
+	{
+		SKIP_HEADER();
+		bytesWritten += writeFloat32(radius, rw);
+		rw.write((char*)&color[0], 12);
+		bytesWritten += 12;
+		bytesWritten += writeFloat32(minusCosAngle, rw);
+		bytesWritten += writeUInt16(flags, rw);
+		bytesWritten += writeUInt16(type, rw);
+		WRITE_HEADER(CHUNK_STRUCT);
+	}
+	bytesWritten += writtenBytesReturn;
+
+	{
+		SKIP_HEADER();
+		WRITE_HEADER(CHUNK_EXTENSION);
+	}
+	bytesWritten += writtenBytesReturn;
+
+	WRITE_HEADER(CHUNK_LIGHT);
 	return bytesWritten;
 }
 
