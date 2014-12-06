@@ -438,7 +438,8 @@ struct Geometry
 	std::vector<uint8> nightColors;
 
 	/* 2dfx */
-	// to do
+	bool has2dfx;
+	std::vector<uint8> twodfxData;
 
 	/* morph (only flag) */
 	bool hasMorph;

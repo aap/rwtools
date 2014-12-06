@@ -408,6 +408,14 @@ uint32 Geometry::write(ostream &rw)
 		bytesWritten += writtenBytesReturn;
 
 		// 2dfx
+		writtenBytesReturn = 0;
+		if (has2dfx) {
+			SKIP_HEADER();
+			rw.write((char*)&twodfxData[0], twodfxData.size());
+			bytesWritten += twodfxData.size();
+			WRITE_HEADER(CHUNK_2DFX);
+		}
+		bytesWritten += writtenBytesReturn;
 
 		// Skin
 		writtenBytesReturn = 0;

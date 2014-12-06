@@ -533,7 +533,9 @@ Geometry::readExtension(istream &rw)
 			rw.seekg(header.length, ios::cur);
 			break;
 		case CHUNK_2DFX:
-			rw.seekg(header.length, ios::cur);
+			has2dfx = true;
+			twodfxData.resize(header.length);
+			rw.read((char*)&twodfxData[0], header.length);
 			break;
 		default:
 			rw.seekg(header.length, ios::cur);
@@ -954,7 +956,7 @@ Geometry::Geometry(void)
   hasNormals(false), faceType(0), numIndices(0), hasSkin(false), boneCount(0),
   specialIndexCount(0), unknown1(0), unknown2(0), hasMeshExtension(false),
   meshExtension(0), hasNightColors(false), nightColorsUnknown(0),
-  hasMorph(false)
+  has2dfx(false), hasMorph(false)
 {
 }
 
