@@ -993,7 +993,7 @@ Geometry::Geometry(const Geometry &orig)
   inverseMatrices(orig.inverseMatrices),
   hasMeshExtension(orig.hasMeshExtension), hasNightColors(orig.hasNightColors),
   nightColorsUnknown(orig.nightColorsUnknown), nightColors(orig.nightColors),
-  hasMorph(orig.hasMorph)
+  has2dfx(orig.has2dfx), hasMorph(orig.hasMorph)
 {
 	if (orig.meshExtension)
 		meshExtension = new MeshExtension(*orig.meshExtension);
@@ -1051,6 +1051,8 @@ Geometry &Geometry::operator=(const Geometry &that)
 		hasNightColors = that.hasNightColors;
 		nightColorsUnknown = that.nightColorsUnknown;
 		nightColors = that.nightColors;
+
+		has2dfx = that.has2dfx;
 
 		hasMorph = that.hasMorph;
 	}
@@ -1292,7 +1294,7 @@ Material::Material(const Material& orig)
   hasMatFx(orig.hasMatFx), hasReflectionMat(orig.hasReflectionMat),
   reflectionIntensity(orig.reflectionIntensity),
   hasSpecularMat(orig.hasSpecularMat), specularLevel(orig.specularLevel),
-  specularName(orig.specularName)
+  specularName(orig.specularName), hasUVAnim(orig.hasUVAnim)
 {
 	if (orig.matFx)
 		matFx = new MatFx(*orig.matFx);
@@ -1339,6 +1341,8 @@ Material &Material::operator=(const Material &that)
 		hasSpecularMat = that.hasSpecularMat;
 		specularLevel = that.specularLevel;
 		specularName = that.specularName;
+
+		hasUVAnim = that.hasUVAnim;
 	}
 	return *this;
 }

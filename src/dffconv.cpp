@@ -7,16 +7,92 @@
 using namespace std;
 using namespace rw;
 
+enum {
+	DEFAULT = 0,
+	WORLD,
+	VEHICLE,
+	PED
+};
+
 char *argv0;
+
+int
+fixmat(Material *mat)
+{
+	if(!mat->hasRightToRender || mat->rightToRenderVal1 != CHUNK_PDSPLG)
+		return 0;
+	switch(mat->rightToRenderVal2){
+	case 0x53f20085:
+		mat->hasSpecularMat = false;
+	case 0x53f20087:
+		mat->hasReflectionMat = false;
+	case 0x53f2008b:
+		mat->hasRightToRender = false;
+		return 0x53f2009a;	// vehicle pipeline
+		break;
+	}
+	return 0;
+}
+
+void
+fixatm(Atomic *a, int type, int pipeline)
+{
+	if(a->hasRightToRender && a->rightToRenderVal1 == CHUNK_PDSPLG){
+/*		// whaaa
+		if(pipeline  == 0 && 
+		   (a->rightToRenderVal2 == 0x1100d || a->rightToRenderVal2 == 0x1100e))
+			pipeline = 0x53f2009a;
+*/
+		a->hasRightToRender = false;
+	}
+/*	// what's this? when do we have one?
+	if(a->hasMaterialFx && !a->hasRightToRender){
+		a->hasRightToRender = true;
+		a->rightToRenderVal1 = CHUNK_MATERIALEFFECTS;
+		a->rightToRenderVal2 = 0;
+	}
+*/
+	if(pipeline == 0)
+		return;
+	if(type == DEFAULT){
+		a->hasPipelineSet = true;
+		a->pipelineSetVal = pipeline;
+	}else if(type == WORLD){
+	}else if(type == VEHICLE){
+		if(pipeline != 0x53f2009a){
+			a->hasPipelineSet = true;
+			a->pipelineSetVal = pipeline;
+		}
+	}else if(type == PED){
+	}
+}
+
+void
+fixpipeline(Clump *c, int type)
+{
+	int ret, pipeline;
+	for(uint32 i = 0; i < c->atomicList.size(); i++){
+		Geometry *g = &c->geometryList[c->atomicList[i].geometryIndex];
+		pipeline = 0;
+		for(uint32 j = 0; j < g->materialList.size(); j++){
+			ret = fixmat(&g->materialList[j]);
+			if(ret)
+				pipeline = ret;
+		}
+		fixatm(&c->atomicList[i], type, pipeline);
+	}
+}
 
 void
 usage(void)
 {
 	cerr << "usage: " << argv0 <<
-	        " [-d] [-dd] " <<
+	        " [-d] [-dd]" <<
 	        " [-c] [-v version_string] [-V version] " <<
 	        " in_dff out_dff\n";
 	cerr << "-c: Clean up geometries; advised for PS2 dffs.\n";
+	cerr << "-m: Fix environment and specular material of PS2 dffs " <<
+	        "according to pipeline used.\n";
 	cerr << "-v: Known versions: GTA3, GTAVC_1, GTAVC_2, GTASA\n";
 	cerr << "-V: Set any version you like in hexadecimal.\n";
 	cerr << "-d: Dump dff data.\n";
@@ -37,9 +113,11 @@ main(int argc, char *argv[])
 	}
 
 	string verstring;
+	string typestr = "default";
 	version = VCPC;
 	int cleanflag = 0;
 	int dumpflag = 0;
+	int fixmatflag = 0;
 	ARGBEGIN{
 	case 'v':
 		verstring = EARGF(usage());
@@ -63,9 +141,29 @@ main(int argc, char *argv[])
 	case 'd':
 		dumpflag++;
 		break;
+	case 'm':
+		fixmatflag++;
+		break;
+	case 't':
+		typestr = EARGF(usage());
+		break;
 	default:
 		usage();
 	}ARGEND;
+
+	int type;
+	if(typestr == "default")
+		type = DEFAULT;
+	else if(typestr == "world")
+		type = WORLD;
+	else if(typestr == "vehicle")
+		type = VEHICLE;
+	else if(typestr == "ped")
+		type = PED;
+	else{
+		cerr << "unknown type " << typestr << endl;
+		return 1;
+	}
 
 	if(argc < 2)
 		usage();
@@ -90,9 +188,12 @@ main(int argc, char *argv[])
 			clump->read(in);
 		
 			if(cleanflag)
-				for (uint32 i = 0; i < clump->geometryList.size(); i++)
+				for(uint32 i = 0; i < clump->geometryList.size(); i++)
 					clump->geometryList[i].cleanUp();
-		
+
+			if(fixmatflag)
+				fixpipeline(clump, type);
+
 			if(dumpflag)
 				clump->dump(dumpflag > 1);
 		

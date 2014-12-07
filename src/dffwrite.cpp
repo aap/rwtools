@@ -200,6 +200,15 @@ uint32 Atomic::write(ostream &rw)
 		}
 		bytesWritten += writtenBytesReturn;
 
+		// Material Fx
+		writtenBytesReturn = 0;
+		if (hasMaterialFx) {
+			SKIP_HEADER();
+			bytesWritten += writeUInt32(materialFxVal, rw);
+			WRITE_HEADER(CHUNK_MATERIALEFFECTS);
+		}
+		bytesWritten += writtenBytesReturn;
+
 		// Particles
 		writtenBytesReturn = 0;
 		if (hasParticles) {
@@ -215,15 +224,6 @@ uint32 Atomic::write(ostream &rw)
 			SKIP_HEADER();
 			bytesWritten += writeUInt32(pipelineSetVal, rw);
 			WRITE_HEADER(CHUNK_PIPELINESET);
-		}
-		bytesWritten += writtenBytesReturn;
-
-		// Material Fx
-		writtenBytesReturn = 0;
-		if (hasMaterialFx) {
-			SKIP_HEADER();
-			bytesWritten += writeUInt32(materialFxVal, rw);
-			WRITE_HEADER(CHUNK_MATERIALEFFECTS);
 		}
 		bytesWritten += writtenBytesReturn;
 
