@@ -117,8 +117,21 @@ void Geometry::readPs2NativeData(istream &rw)
 			}
 		}
 		this->numIndices += splits[i].indices.size();
+
+		// TODO: night vertex colors
+		int nverts = vertices.size()/3;
+		if(flags & FLAGS_NORMALS)
+			normals.resize(nverts*3);
+		if(flags & FLAGS_PRELIT){
+			vertexColors.resize(nverts*4);
+			nightColors.resize(nverts*4);
+		}
+		if(flags & FLAGS_TEXTURED || flags & FLAGS_TEXTURED2)
+			for(uint32 i = 0; i < numUVs; i++)
+				texCoords[i].resize(nverts*2);
 	}
 
+/*
 	int nverts = vertices.size()/3;
 	// this happens in some objects
 	if(flags & FLAGS_NORMALS && normals.size() == 0)
@@ -131,6 +144,7 @@ void Geometry::readPs2NativeData(istream &rw)
 		for(uint32 i = 0; i < numUVs; i++)
 			if(texCoords[i].size() == 0)
 				texCoords[i].resize(nverts*2);
+*/
 }
 
 

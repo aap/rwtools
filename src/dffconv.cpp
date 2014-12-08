@@ -100,6 +100,31 @@ usage(void)
 	exit(1);
 }
 
+void
+sanityCheck(Geometry *g)
+{
+	int nverts = g->vertices.size()/3;
+	int nnorms = g->normals.size()/3;
+	int ncolors = g->vertexColors.size()/4;
+	int nncolors = g->nightColors.size()/4;
+	int nuv[8];
+	nuv[0] = g->texCoords[0].size()/2;
+	nuv[1] = g->texCoords[1].size()/2;
+	int nfaces = g->faces.size()/4;
+//	if(nverts != g->vertexCount)
+//		cout << "vertices: " << nverts << " " << g->vertexCount << endl;
+	if((g->flags & FLAGS_NORMALS) && nverts != nnorms)
+		cout << "normals: " << nnorms << " " << nverts << endl;
+	if((g->flags & FLAGS_PRELIT) && nverts != ncolors)
+		cout << "colors: " << ncolors << " " << nverts << endl;
+	if(((g->flags & FLAGS_TEXTURED) || (g->flags & FLAGS_TEXTURED2)))
+		for(int i = 0; i < g->numUVs; i++)
+			if(nverts != nuv[i])
+				cout << "uv " << i << ": " << nuv[i] << " " << nverts << endl;
+	if(g->hasNightColors && nncolors != nverts)
+		cout << "ncolors: " << nncolors << " " << nverts << endl;
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -186,7 +211,10 @@ main(int argc, char *argv[])
 			in.seekg(-12, ios::cur);
 			Clump *clump = new Clump;
 			clump->read(in);
-		
+
+			for(uint32 i = 0; i < clump->geometryList.size(); i++)
+				sanityCheck(&clump->geometryList[i]);
+
 			if(cleanflag)
 				for(uint32 i = 0; i < clump->geometryList.size(); i++)
 					clump->geometryList[i].cleanUp();

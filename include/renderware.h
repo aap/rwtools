@@ -179,7 +179,7 @@ enum {
         FLAGS_PRELIT     = 0x08, 
         FLAGS_NORMALS    = 0x10, 
         FLAGS_LIGHT      = 0x20, 
-			FLAGS_MODULATEMATERIALCOLOR  = 0x40, 
+	FLAGS_MODULATEMATERIALCOLOR  = 0x40, 
         FLAGS_TEXTURED2  = 0x80
 };
 
