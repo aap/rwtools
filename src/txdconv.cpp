@@ -83,7 +83,7 @@ main(int argc, char *argv[])
 	if(dx9)
 		for(uint32 i = 0; i < txd->texList.size(); i++){
 			txd->texList[i].platform = PLATFORM_D3D9;
-			txd->texList[i].filterFlags = 0x1101;
+//			txd->texList[i].filterFlags = 0x1101;
 		}
 
 	txd->write(out);

@@ -307,8 +307,9 @@ void NativeTexture::readPs2(istream &rw)
 	depth = readUInt32(rw);
 	rasterFormat = readUInt32(rw);
 
-	if(rasterFormat == 0x22504 && width[0] == 128 && height[0] == 128 && depth == 4)
-		cout << filename << endl;
+//	if(rasterFormat == 0x22504 && width[0] == 128 && height[0] == 128 && depth == 4)
+//		cout << filename << endl;
+//	cout << hex << rasterFormat << endl;
 
 	uint32 unk1 = readUInt32(rw);		// what are these?
 	uint32 unk2 = readUInt32(rw);
@@ -502,6 +503,11 @@ void NativeTexture::convertFromPS2(uint32 aref)
 		return;
 
 	for (uint32 j = 0; j < mipmapCount; j++) {
+		// can't understand mipmaps
+		if(j > 0){
+			delete[] texels[j];
+			continue;
+		}
 		bool swizzled = (swizzleHeight[j] != height[j]);
 
 		// converts to 8bpp, palette stays 4bit
@@ -536,6 +542,14 @@ void NativeTexture::convertFromPS2(uint32 aref)
 //					hasAlpha = true;
 			}
 		}
+	}
+	// can't understand ps2 mipmaps
+	if(mipmapCount > 1){
+		mipmapCount = 1;
+		texels.resize(1);
+		height.resize(1);
+		width.resize(1);
+		rasterFormat &= ~(RASTER_AUTOMIPMAP | RASTER_MIPMAP);
 	}
 
 	if (rasterFormat & RASTER_PAL8 || rasterFormat & RASTER_PAL4) {
