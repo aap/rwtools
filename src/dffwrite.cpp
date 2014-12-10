@@ -46,7 +46,7 @@ uint32 Clump::write(ostream &rw)
 		bytesWritten += writeUInt32(atomicList.size(), rw);
 		if (version != GTA3_1 && version != GTA3_2 &&
 		    version != GTA3_3 && version != GTA3_4) {
-			bytesWritten += writeUInt32(0, rw);
+			bytesWritten += writeUInt32(lightList.size(), rw);
 			bytesWritten += writeUInt32(0, rw);
 		}
 		WRITE_HEADER(CHUNK_STRUCT);
@@ -706,6 +706,8 @@ uint32 Material::write(ostream &rw)
 			} case MATFX_UVTRANSFORM: {
 				bytesWritten += writeUInt32(MATFX_UVTRANSFORM,	
 				                            rw);
+				bytesWritten += writeUInt32(MATFX_UVTRANSFORM,	
+				                            rw);
 				bytesWritten += writeUInt32(0, rw);
 				break;
 			} default:
@@ -766,7 +768,7 @@ uint32 Material::write(ostream &rw)
 				WRITE_HEADER(CHUNK_STRUCT);
 			}
 			bytesWritten += writtenBytesReturn;
-			WRITE_HEADER(CHUNK_UVANIMDICT);
+			WRITE_HEADER(CHUNK_UVANIMPLG);
 		}
 		bytesWritten += writtenBytesReturn;
 

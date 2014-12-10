@@ -1203,7 +1203,7 @@ void Material::readExtension(istream &rw)
 			delete[] name;
 			break;
 		}
-		case CHUNK_UVANIMDICT:
+		case CHUNK_UVANIMPLG:
 			READ_HEADER(CHUNK_STRUCT);
 			hasUVAnim = true;
 			uvVal = readUInt32(rw);

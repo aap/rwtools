@@ -112,17 +112,17 @@ sanityCheck(Geometry *g)
 	nuv[1] = g->texCoords[1].size()/2;
 	int nfaces = g->faces.size()/4;
 //	if(nverts != g->vertexCount)
-//		cout << "vertices: " << nverts << " " << g->vertexCount << endl;
+//		cout << filename << " vertices: " << nverts << " " << g->vertexCount << endl;
 	if((g->flags & FLAGS_NORMALS) && nverts != nnorms)
-		cout << "normals: " << nnorms << " " << nverts << endl;
+		cout << filename << " normals: " << nnorms << " " << nverts << endl;
 	if((g->flags & FLAGS_PRELIT) && nverts != ncolors)
-		cout << "colors: " << ncolors << " " << nverts << endl;
+		cout << filename << " colors: " << ncolors << " " << nverts << endl;
 	if(((g->flags & FLAGS_TEXTURED) || (g->flags & FLAGS_TEXTURED2)))
 		for(int i = 0; i < g->numUVs; i++)
 			if(nverts != nuv[i])
-				cout << "uv " << i << ": " << nuv[i] << " " << nverts << endl;
+				cout << filename << " uv " << i << ": " << nuv[i] << " " << nverts << endl;
 	if(g->hasNightColors && nncolors != nverts)
-		cout << "ncolors: " << nncolors << " " << nverts << endl;
+		cout << filename << " ncolors: " << nncolors << " " << nverts << endl;
 }
 
 int
