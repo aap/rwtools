@@ -1,16 +1,14 @@
----------------------------
-DFF------------------------
----------------------------
-lights
-2dfx
-uvanim
-collision
+Rewrite everything to be more RW like (especially the plugin system)
 
----------------------------
-TXD------------------------
----------------------------
-uncompressed xbox
+DFF
+---
+- parse 2dfx
+- parse uvanim
+- parse collision (merge code by thelink2012)
+- rewrite the handling of native data to not ignore the pipeline
 
-write ps2 format (5 unknowns left)
+TXD
+---
+- work on this more in general
+- use quiret's code
 
-(write conversion functions)

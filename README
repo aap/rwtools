@@ -11,3 +11,5 @@ to the familiar PC format.
 Some useful example programs can be found in `bin` after compilation.
 
 To compile, simple type `make`. Use MinGW/MSYS on Windows.
+
+The code is public domain, do what you want with it.
