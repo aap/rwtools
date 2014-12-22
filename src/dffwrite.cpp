@@ -562,13 +562,17 @@ uint32 Geometry::writeMeshExtension(ostream &rw)
 			        0x20);
 			rw.write(buffer, 0x20);
 			bytesWritten += 0x20;
+		}
 
+		for (uint32 i = 0; i < materialCount; i++) {
 			memset(buffer, 0, 0x20);
 			strncpy(buffer, meshExtension->maskName[i].c_str(),
 			        0x20);
 			rw.write(buffer, 0x20);
 			bytesWritten += 0x20;
+		}
 
+		for (uint32 i = 0; i < materialCount; i++) {
 			bytesWritten +=
 			  writeFloat32(meshExtension->unknowns[i*3+0], rw);
 			bytesWritten +=

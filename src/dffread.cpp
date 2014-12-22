@@ -631,8 +631,12 @@ void Geometry::readMeshExtension(istream &rw)
 	for (uint32 i = 0; i < materialCount; i++) {
 		rw.read(buffer, 0x20);
 		meshExtension->textureName[i] = buffer;
+	}
+	for (uint32 i = 0; i < materialCount; i++) {
 		rw.read(buffer, 0x20);
 		meshExtension->maskName[i] = buffer;
+	}
+	for (uint32 i = 0; i < materialCount; i++) {
 		meshExtension->unknowns.push_back(readFloat32(rw));
 		meshExtension->unknowns.push_back(readFloat32(rw));
 		meshExtension->unknowns.push_back(readFloat32(rw));
@@ -665,8 +669,12 @@ void Geometry::generateFaces(void)
 		Split &s = splits[i];
 		if (faceType == FACETYPE_STRIP)
 			for (uint32 j = 0; j < s.indices.size()-2; j++) {
-				if (isDegenerateFace(s.indices[j+0],
-				    s.indices[j+1], s.indices[j+2]))
+//				if (isDegenerateFace(s.indices[j+0],
+//				    s.indices[j+1], s.indices[j+2]))
+//					continue;
+				if(s.indices[j+0] == s.indices[j+1] ||
+				   s.indices[j+0] == s.indices[j+2] ||
+				   s.indices[j+1] == s.indices[j+2])
 					continue;
 				faces.push_back(s.indices[j+1 + (j%2)]);
 				faces.push_back(s.indices[j+0]);

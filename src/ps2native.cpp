@@ -176,8 +176,10 @@ void Geometry::readData(uint32 vertexCount, uint32 type,
 			vertices.push_back(vertex[0] * vertexScale);
 			vertices.push_back(vertex[1] * vertexScale);
 			vertices.push_back(vertex[2] * vertexScale);
-			if (flag == 0x8000)
+			if (flag == 0x8000){
 				splits[split].indices.push_back(index-1);
+				splits[split].indices.push_back(index-1);
+			}
 			splits[split].indices.push_back(index++);
 		}
 		break;
