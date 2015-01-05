@@ -19,13 +19,24 @@ char *argv0;
 int
 fixmat(Material *mat)
 {
+	if(mat->hasTex)
+		mat->texture.hasSkyMipmap = false;
+	if(mat->hasMatFx){
+		if(mat->matFx->hasTex1)
+			mat->matFx->tex1.hasSkyMipmap = false;
+		if(mat->matFx->hasTex2)
+			mat->matFx->tex2.hasSkyMipmap = false;
+	}
+
 	if(!mat->hasRightToRender || mat->rightToRenderVal1 != CHUNK_PDSPLG)
 		return 0;
+	mat->hasRightToRender = false;
 	switch(mat->rightToRenderVal2){
+	// maybe the other way around?
 	case 0x53f20085:
-		mat->hasSpecularMat = false;
-	case 0x53f20087:
 		mat->hasReflectionMat = false;
+	case 0x53f20087:
+		mat->hasSpecularMat = false;
 	case 0x53f2008b:
 		mat->hasRightToRender = false;
 		return 0x53f2009a;	// vehicle pipeline
